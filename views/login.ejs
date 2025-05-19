@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Google Login Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 80px;
+            background: linear-gradient(to right, #e0f7fa, #80deea);
+        }
+        .btn-google {
+            background: #4285F4;
+            color: #fff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .btn-google:hover {
+            background: #3367D6;
+        }
+        .avatar {
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+<% if (!user) { %>
+    <h2>Chào bạn!</h2>
+    <a href="/auth/google" class="btn-google">Đăng nhập bằng Google</a>
+<% } else { %>
+    <h2>Xin chào, <%= user.displayName %>!</h2>
+    <p>Email: <%= user.emails[0].value %></p>
+    <img src="<%= user.photos[0].value %>" alt="avatar" width="120" class="avatar">
+    <br><br>
+    <a href="/logout" class="btn-google" style="background: #999;">Đăng xuất</a>
+<% } %>
+
+</body>
+</html>
