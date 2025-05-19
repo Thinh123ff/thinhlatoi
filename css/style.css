@@ -203,11 +203,9 @@ body {
     margin: 12px 0 6px;
 }
 .message-content {
-    background: none;
-    width: 100%;
-    word-wrap: break-word;
-    border-radius: var(--radius);
-    line-height: 1.5;
+    max-width: 100%;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 .message-content p{
     padding-top: 20px;
@@ -226,12 +224,13 @@ pre code.hljs {
     padding: 1em
 }
 .message-content code {
-    background-color: #424242;
-    color: white;
-    padding: .15rem .3rem;
+    font-family: Consolas, monospace;
+    font-size: 14px;
+    background-color: #2c2c2c;
+    color: #f3f3f3;
+    padding: 2px 4px;
     border-radius: 4px;
-    font-family: monospace;
-    font-size: .875em;
+    word-break: break-word;
 }
 .message-content table {
     width: 100%;
@@ -249,16 +248,18 @@ pre code.hljs {
     background-color: #262153;
     color: white;
 }
+/* Code block AI trả lời */
 .message-content pre {
-    background-color: #242424;
-    padding: 10px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-    border-radius: 15px;
-    border: 1px solid #3f3f3f;
+    background-color: #1e1e1e;
+    color: #f8f8f2;
+    border-radius: 8px;
+    font-size: 14px;
     overflow-x: auto;
-    font-family: monospace;
-    font-size: 105%;
+    max-width: 100%;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    box-sizing: border-box;
+    line-height: 1.5;
 }
 .message-content ul {
     padding-left: 20px;
@@ -669,9 +670,30 @@ textarea {
 }
 /* Responsive design */
 @media (max-width: 768px) {
-    .chat-container {
-        position: relative;
-        top: 0;
+    .copy-btn{
+        position: absolute;
+        top: 8px;
+        left: 340px;
+        /* right: 0; */
+        background: #3f3f3f;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        font-size: 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        z-index: 2;
+    }
+    .message-content pre {
+        font-size: 13px;
+        background-color: #1e1e1e;
+        color: #f8f8f2;
+        border-radius: 8px;
+        overflow-x: auto;
+        max-width: 380px;
+        overflow-wrap: break-word;
+        box-sizing: border-box;
+        line-height: 1.5;
     }
     .chat-container:not(.has-messages) .input-wrapper {
         top: 87vh;
@@ -695,8 +717,9 @@ textarea {
     .theme-toggle{
         position: absolute;
     }
-    .messages{
-        padding-top: 60px;
+    .messages {
+        padding-left: 10px;
+        padding-right: 10px;
     }
     .initial-state{
         top: 35vh;
