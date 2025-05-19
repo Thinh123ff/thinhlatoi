@@ -183,7 +183,7 @@ body {
     flex-direction: column;
     max-width: 800px;
     width: 100%;
-    padding: 16px;
+    padding: 5px;
     position: relative;
     margin-bottom: 150px;
     top: 0;
@@ -674,7 +674,6 @@ textarea {
         position: absolute;
         top: 8px;
         left: 340px;
-        /* right: 0; */
         background: #3f3f3f;
         color: white;
         border: none;
@@ -718,8 +717,9 @@ textarea {
         position: absolute;
     }
     .messages {
-        padding-left: 10px;
-        padding-right: 10px;
+        max-width: 380px;
+        padding-left: 5px;
+        padding-right: 5px;
     }
     .initial-state{
         top: 35vh;
