@@ -709,6 +709,7 @@ textarea {
         overflow-x: auto;
         max-width: 96vw;
         white-space: pre;
+        overflow-wrap: break-word;
         box-sizing: border-box;
         line-height: 1.5;
         padding: 10px;
@@ -724,7 +725,6 @@ textarea {
         max-width: 96vw;
         width: 100%;
     }
-
     .message-content .table-wrapper table {
         min-width: 500px;
         display: inline-block;
