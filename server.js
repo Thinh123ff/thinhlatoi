@@ -236,9 +236,9 @@ app.post('/ask', upload.array('files'), async (req, res) => {
             ];
         }
 
-        const tokenLimit = 4096; // hoặc 8192 nếu model hỗ trợ
+        const tokenLimit = 8000;
         const promptTokens = countTokensFromMessages(session.messages);
-        const safeMaxTokens = Math.max(256, tokenLimit - promptTokens - 100); // chừa 100 tokens an toàn
+        const safeMaxTokens = tokenLimit - promptTokens;
 
         console.log('Đang gửi yêu cầu đến OpenRouter...');
         console.log(`promptTokens: ${promptTokens}, max_tokens: ${safeMaxTokens}`);
