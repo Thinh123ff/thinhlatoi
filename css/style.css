@@ -11,9 +11,9 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Inter', 'Helvetica Neue', 'Segoe UI', 'Roboto', sans-serif;
 }
 body {
+    font-family: 'Inter', 'Helvetica Neue', 'Segoe UI', 'Roboto', sans-serif;
     background-color: var(--light-bg);
     color: var(--text-color);
     height: 100vh;
@@ -206,6 +206,15 @@ body {
     max-width: 100%;
     word-break: break-word;
     overflow-wrap: break-word;
+    overflow-x: hidden;
+}
+.message-content p,
+.message-content div,
+.message-content span,
+.message-content td,
+.message-content th {
+    word-break: break-word;
+    white-space: normal;
 }
 .message-content p{
     padding-top: 20px;
@@ -219,8 +228,6 @@ body {
 }
 pre code.hljs {
     background: #232323;
-    display: block;
-    overflow-x: auto;
     padding: 1em
 }
 .message-content code {
@@ -235,14 +242,17 @@ pre code.hljs {
 .message-content table {
     width: 100%;
     border-collapse: collapse;
-    margin: 12px 0;
     font-size: 15px;
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
 }
 .message-content th,
 .message-content td {
     border: 1px solid #ccc;
     padding: 8px 12px;
     text-align: left;
+    min-width: 100px;
 }
 .message-content th {
     background-color: #262153;
@@ -250,7 +260,7 @@ pre code.hljs {
 }
 /* Code block AI trả lời */
 .message-content pre {
-    background-color: #1e1e1e;
+    background-color: #232323;
     color: #f8f8f2;
     border-radius: 8px;
     font-size: 14px;
@@ -260,6 +270,8 @@ pre code.hljs {
     overflow-wrap: break-word;
     box-sizing: border-box;
     line-height: 1.5;
+    padding: 1em;
+    white-space: pre;
 }
 .message-content ul {
     padding-left: 20px;
@@ -274,6 +286,10 @@ pre code.hljs {
 }
 .messages::-webkit-scrollbar {
     display: none;
+}
+.message-content .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 /* Initial state styles */
 .initial-state {
@@ -668,12 +684,13 @@ textarea {
         opacity: 1;
     }
 }
-/* Responsive design */
+
 @media (max-width: 768px) {
-    .copy-btn{
+    .copy-btn {
         position: absolute;
         top: 8px;
-        left: 340px;
+        left: auto;
+        right: 10px;
         background: #3f3f3f;
         color: white;
         border: none;
@@ -683,45 +700,86 @@ textarea {
         cursor: pointer;
         z-index: 2;
     }
+
     .message-content pre {
         font-size: 13px;
         background-color: #1e1e1e;
         color: #f8f8f2;
         border-radius: 8px;
         overflow-x: auto;
-        max-width: 380px;
-        overflow-wrap: break-word;
+        max-width: 96vw;
+        white-space: pre;
         box-sizing: border-box;
         line-height: 1.5;
+        padding: 10px;
     }
+
+    .message-content pre code {
+        min-width: 500px;
+        display: inline-block;
+    }
+
+    .message-content table {
+        overflow-x: auto;
+        max-width: 96vw;
+        width: 100%;
+    }
+
+    .message-content .table-wrapper table {
+        min-width: 500px;
+        display: inline-block;
+        font-size: 14px;
+    }
+
+    .message-content th,
+    .message-content td {
+        font-size: 13px;
+        padding: 6px 10px;
+        min-width: 100px;
+        word-break: break-word;
+    }
+
     .chat-container:not(.has-messages) .input-wrapper {
         top: 87vh;
         bottom: auto;
         width: 100%;
         transform: translate(-50%, -50%);
     }
-    .header{
+
+    .header {
         position: fixed;
         width: 100%;
         height: 40px;
         background-color: white;
         z-index: 10;
     }
+
     .logo {
         position: relative;
         font-size: 20px;
         font-weight: bold;
         color: var(--primary-color);
     }
-    .theme-toggle{
+
+    .theme-toggle {
         position: absolute;
     }
+
     .messages {
-        max-width: 380px;
+        width: 100%;
         padding-left: 5px;
         padding-right: 5px;
+        overflow-x: hidden;
     }
-    .initial-state{
+
+    .message-content p,
+    .message-content div,
+    .message-content span {
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    .initial-state {
         top: 35vh;
     }
 }

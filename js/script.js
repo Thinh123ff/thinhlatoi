@@ -246,7 +246,7 @@ function updateLayout() {
 
 // Tải lịch sử hội thoại từ server
 function loadConversationHistory() {
-    fetch(`https://chat-bot-server-foxw.onrender.com/conversation/${currentSessionId}`)
+    fetch(`http://localhost:5000/conversation/${currentSessionId}`)
         .then(res => {
             if (!res.ok) {
                 // Nếu không tìm thấy phiên (mã lỗi 404), tạo phiên mới
@@ -316,7 +316,7 @@ function sendMessage() {
     isGenerating = true;
     toggleSendStopButton('stop');
 
-    fetch('https://chat-bot-server-foxw.onrender.com/ask', {
+    fetch('http://localhost:5000/ask', {
         method: 'POST',
         body: formData,
         signal: signal
