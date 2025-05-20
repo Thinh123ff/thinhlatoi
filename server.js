@@ -12,7 +12,12 @@ const app = express();
 const port = 5000;
 const upload = multer({ dest: 'uploads/' });
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://thinhnt-mr.github.io',
+        'https://cron-job.org'
+    ]
+}));
 app.use(express.json());
 app.use(express.static('public'));
 
