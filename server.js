@@ -228,7 +228,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
         });
 
         // Giới hạn số lượng tin nhắn để không vượt quá token
-        const maxMessagesToKeep = 20; // Có thể điều chỉnh theo nhu cầu
+        const maxMessagesToKeep = 10; // Có thể điều chỉnh theo nhu cầu
         if (session.messages.length > maxMessagesToKeep + 1) { // +1 cho system message
             session.messages = [
                 session.messages[0], // Giữ system message
@@ -236,9 +236,9 @@ app.post('/ask', upload.array('files'), async (req, res) => {
             ];
         }
 
-        const tokenLimit = 4000;
+        const tokenLimit = 4096; // hoặc 8192 nếu model hỗ trợ
         const promptTokens = countTokensFromMessages(session.messages);
-        const safeMaxTokens = Math.max(100, Math.min(2000, tokenLimit - promptTokens));
+        const safeMaxTokens = Math.max(256, tokenLimit - promptTokens - 100); // chừa 100 tokens an toàn
 
         console.log('Đang gửi yêu cầu đến OpenRouter...');
         console.log(`promptTokens: ${promptTokens}, max_tokens: ${safeMaxTokens}`);

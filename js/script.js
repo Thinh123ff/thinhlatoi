@@ -328,63 +328,53 @@ function sendMessage() {
     messageDiv.appendChild(cardDiv);
     messagesContainer.appendChild(messageDiv);
 
-    // Tạo text node để append từng từ
-    const textNode = document.createTextNode('');
-    contentDiv.appendChild(textNode);
+    let fullText = '';
 
-    fetch('https://chat-bot-server-foxw.onrender.com/ask', {
-        method: 'POST',
-        body: formData,
-        signal: signal
-    })
-    .then(response => {
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
+fetch('https://chat-bot-server-foxw.onrender.com/ask', {
+    method: 'POST',
+    body: formData,
+    signal: signal
+})
+.then(response => {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
 
-        function processStream({ done, value }) {
-            if (done) {
-                if (buffer.length > 0) {
-                    try {
-                        const data = JSON.parse(buffer);
-                        if (data.content) {
-                            textNode.textContent += data.content;
-                            scrollToBottom(true);
-                        }
-                    } catch (e) {
-                        console.error('Error parsing final buffer:', e);
-                    }
+    function processStream({ done, value }) {
+        if (done) {
+            return;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+            if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') {
+                    return;
                 }
-                return;
-            }
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop();
-
-            for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                    const data = line.slice(6);
-                    if (data === '[DONE]') {
-                        return;
+                try {
+                    const parsed = JSON.parse(data);
+                    if (parsed.content) {
+                        fullText += parsed.content;
+                        // Render markdown mỗi lần nhận được text mới
+                        contentDiv.innerHTML = '';
+                        contentDiv.appendChild(formatMessage(fullText));
+                        scrollToBottom(true);
                     }
-                    try {
-                        const parsed = JSON.parse(data);
-                        if (parsed.content) {
-                            textNode.textContent += parsed.content;
-                            scrollToBottom(true);
-                        }
-                    } catch (e) {
-                        console.error('Error parsing stream data:', e);
-                    }
+                } catch (e) {
+                    console.error('Error parsing stream data:', e);
                 }
             }
-
-            return reader.read().then(processStream);
         }
 
         return reader.read().then(processStream);
-    })
+    }
+
+    return reader.read().then(processStream);
+})
     .catch(err => {
         if (err.name === 'AbortError') {
             console.log('Fetch aborted');
