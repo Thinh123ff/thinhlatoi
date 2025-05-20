@@ -11,9 +11,9 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Inter', 'Helvetica Neue', 'Segoe UI', 'Roboto', sans-serif;
 }
 body {
-    font-family: 'Inter', 'Helvetica Neue', 'Segoe UI', 'Roboto', sans-serif;
     background-color: var(--light-bg);
     color: var(--text-color);
     height: 100vh;
@@ -200,7 +200,7 @@ body {
 }
 .message-content h1, .message-content h2, .message-content h3 {
     font-weight: bold;
-    margin: 12px 0 6px;
+    padding: 25px 0 20px 5px;
 }
 .message-content {
     max-width: 100%;
@@ -716,7 +716,7 @@ textarea {
     }
 
     .message-content pre code {
-        min-width: 500px;
+        min-width: 600px;
         display: inline-block;
     }
 
