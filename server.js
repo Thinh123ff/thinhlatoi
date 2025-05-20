@@ -72,7 +72,7 @@ Ví dụ:
 - Nếu mô tả sự khác biệt, hãy tạo bảng ✅❌ để so sánh, giúp người đọc dễ hiểu hơn.
 - Kết thúc trả lời có thể hỏi lại nhẹ nhàng, thân thiện thêm icon phù hợp ngữ cảnh.
 
-## 📁 Nếu người dùng tải lên file:
+📁 Nếu người dùng tải lên file:
 
 - 📖 **Đọc kỹ nội dung file** và **mô tả lại rõ ràng** cho người dùng dễ hiểu.
 - 🔍 **Phân tích nội dung file**:
@@ -87,36 +87,13 @@ Ví dụ:
 - 📌 **Dùng chính xác tên file** trong phần phản hồi gửi lại người dùng để dễ theo dõi.
 - 📑 **Nhắc lại nội dung yêu cầu đã đọc được** trước khi trả lời để xác nhận với người dùng.
 
-## 💡 Kết thúc trả lời:
+📌 Tránh trả lời hời hợt hoặc “không biết”. Nếu chưa chắc, hãy hỏi lại để làm rõ.
 
-- Có thể kết thúc mỗi câu trả lời bằng **một câu nhắn nhẹ nhàng, thân thiện** nhằm tạo cảm giác thoải mái cho người dùng.
-- Kèm theo **icon hoặc emoji phù hợp với ngữ cảnh**, ví dụ:
-  - Nếu giải bài tập lập trình: 🖥️💡✅
-  - Nếu hướng dẫn nấu ăn: 🍳🍽️
-  - Nếu hỗ trợ kỹ năng mềm: 🌱✨
-- Tránh sử dụng icon hoặc emoji quá lố hoặc không liên quan.
-- Nếu cuộc trò chuyện còn mở (người dùng có thể hỏi tiếp), nên kèm thêm lời mời nhẹ:  
-  _“Nếu còn gì cần giúp, bạn cứ nhắn tiếp cho mình nhé! 😊”_
+🌐 Nếu câu hỏi liên quan đến: link, website, địa chỉ trang web, tên miền... bạn KHÔNG cần đoán hay tạo ra. Hệ thống sẽ tìm kiếm web và hiển thị kết quả. Bạn chỉ phản hồi đơn giản nếu cần.
 
-💡 Mục tiêu: Giữ trải nghiệm hội thoại **thân thiện, tự nhiên, dễ tiếp cận như trò chuyện với người thật.**
-
-## 🧠 Phạm vi hỗ trợ:
-
-- **Chuyên sâu về:**
-  - Lập trình, kỹ thuật, công nghệ thông tin.
-  - Phân tích và giải bài tập lập trình, xử lý code, hướng dẫn kỹ thuật.
-- **Hỗ trợ thêm về:**
-  - Tài liệu học tập các lĩnh vực phổ biến.
-  - Nấu ăn, sức khỏe cơ bản, kỹ năng mềm.
-  - Kinh doanh nhỏ, ý tưởng khởi nghiệp.
-- **Tìm kiếm thông tin nâng cao** nếu có công cụ hỗ trợ (ví dụ: tích hợp search hoặc API tra cứu).
-- **Ngoài phạm vi** các lĩnh vực trên:
-  - Thông báo rõ ràng cho người dùng nếu nội dung yêu cầu **vượt ngoài phạm vi hỗ trợ hoặc chưa đủ công cụ xử lý**.
-  - Gợi ý hướng xử lý khác hoặc đề xuất người dùng tham khảo nguồn phù hợp.
-
-💡 Ưu tiên hỗ trợ tốt nhất với các nội dung về **lập trình, kỹ thuật và xử lý bài tập code logic**.
-
-## 📌 Tránh trả lời hời hợt hoặc “không biết”
+🧠 Phạm vi hỗ trợ:
+- Lập trình, kỹ thuật, tài liệu, học tập, nấu ăn, sức khỏe cơ bản, kỹ năng mềm, kinh doanh nhỏ.
+- Tìm kiếm thông tin nâng cao nếu có công cụ hỗ trợ.
 
 - **Không trả lời qua loa, hời hợt** với những câu hỏi chưa hiểu rõ hoặc thông tin chưa đầy đủ.
 - **Nếu chưa chắc chắn hoặc thông tin mơ hồ**:
@@ -129,9 +106,9 @@ Ví dụ:
 
 💡 Mục tiêu: Đảm bảo câu trả lời **có trách nhiệm, dễ hiểu, không bỏ sót và tạo cảm giác được hỗ trợ nhiệt tình.**
 
-## 🌐 Nếu câu hỏi liên quan đến: link, website, địa chỉ trang web, tên miền... bạn KHÔNG cần đoán hay tạo ra. Hệ thống sẽ tìm kiếm web và hiển thị kết quả. Bạn chỉ phản hồi đơn giản nếu cần.
+🌐 Nếu câu hỏi liên quan đến: link, website, địa chỉ trang web, tên miền... bạn KHÔNG cần đoán hay tạo ra. Hệ thống sẽ tìm kiếm web và hiển thị kết quả. Bạn chỉ phản hồi đơn giản nếu cần.
 
-## 🧠 Ghi nhớ và sử dụng ngữ cảnh hội thoại:
+🧠 Ghi nhớ và sử dụng ngữ cảnh hội thoại:
 
 - Luôn nhớ nội dung hội thoại trước đó để trả lời **mạch lạc, liền mạch và đúng mạch trò chuyện**.
 - Nếu người dùng **hỏi lại về câu trả lời trước** hoặc yêu cầu giải thích thêm:
@@ -143,7 +120,7 @@ Ví dụ:
 - Trong trường hợp cần thiết, **tóm tắt nhanh nội dung hội thoại trước đó** để người dùng dễ theo dõi và gợi nhớ.
 - Giữ cho toàn bộ cuộc trò chuyện **liên tục, tự nhiên, logic** như một cuộc trò chuyện thật sự giữa người với người.
 
-✅ Mục tiêu: Giúp người dùng hiểu sâu hơn hoặc khám phá điều gì đó hữu ích!
+✅ Mục tiêu: Giúp người dùng hiểu sâu hơn và khám phá điều gì đó hữu ích!
 
 Ví dụ khi cần trình bày lịch hoặc phân loại, hãy trả lời như sau:
 
@@ -251,7 +228,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
         });
 
         // Giới hạn số lượng tin nhắn để không vượt quá token
-        const maxMessagesToKeep = 2; // Có thể điều chỉnh theo nhu cầu
+        const maxMessagesToKeep = 20; // Có thể điều chỉnh theo nhu cầu
         if (session.messages.length > maxMessagesToKeep + 1) { // +1 cho system message
             session.messages = [
                 session.messages[0], // Giữ system message
@@ -278,7 +255,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
                 messages: session.messages,
                 max_tokens: safeMaxTokens,
                 temperature: 0.7,
-                stream: false
+                stream: true  // Bật chế độ stream
             },
             {
                 headers: {
@@ -286,6 +263,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
                     'HTTP-Referer': 'http://localhost:5000',
                     'Content-Type': 'application/json'
                 },
+                responseType: 'stream',  // Thêm responseType stream
                 timeout: 120000
             }
         );
@@ -293,23 +271,50 @@ app.post('/ask', upload.array('files'), async (req, res) => {
         // Xoá file tạm
         files.forEach(f => fs.unlinkSync(f.path));
 
-        if (response.data && response.data.choices?.length > 0 && response.data.choices[0].message) {
-            const aiReply = response.data.choices[0].message.content;
+        // Thiết lập response headers cho streaming
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
 
-            // Thêm phản hồi của AI vào phiên
-            session.messages.push({
-                role: 'assistant',
-                content: aiReply
-            });
+        let fullResponse = '';
 
-            res.json({
-                reply: aiReply,
-                sessionId: sessionId
-            });
-        } else {
-            console.error('Cấu trúc phản hồi không hợp lệ:', response.data);
-            res.status(500).json({ reply: "Lỗi cấu trúc phản hồi từ OpenRouter. Vui lòng kiểm tra console." });
-        }
+        // Xử lý stream response
+        response.data.on('data', chunk => {
+            const lines = chunk.toString().split('\n');
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const data = line.slice(6);
+                    if (data === '[DONE]') {
+                        // Kết thúc stream
+                        res.write(`data: [DONE]\n\n`);
+                        res.end();
+                        
+                        // Lưu toàn bộ response vào session
+                        session.messages.push({
+                            role: 'assistant',
+                            content: fullResponse
+                        });
+                        return;
+                    }
+                    
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (parsed.choices?.[0]?.delta?.content) {
+                            const content = parsed.choices[0].delta.content;
+                            fullResponse += content;
+                            res.write(`data: ${JSON.stringify({ content })}\n\n`);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing stream data:', e);
+                    }
+                }
+            }
+        });
+
+        response.data.on('error', err => {
+            console.error('Stream error:', err);
+            res.status(500).json({ reply: "Lỗi khi nhận phản hồi từ OpenRouter" });
+        });
     } catch (err) {
         console.error('Lỗi khi gọi API OpenRouter:');
         if (err.response) {

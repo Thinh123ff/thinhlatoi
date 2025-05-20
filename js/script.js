@@ -285,6 +285,7 @@ function loadConversationHistory() {
         });
 }
 
+// ... existing code ...
 function sendMessage() {
     const message = userInput.value.trim();
     if (message === '') return;
@@ -308,7 +309,7 @@ function sendMessage() {
 
     // 👇 Hiện typing indicator
     typingIndicator.style.display = 'flex';
-    scrollToBottom(true); // 👈 đảm bảo kéo xuống để thấy "3 chấm"
+    scrollToBottom(true);
 
     controller = new AbortController();
     const signal = controller.signal;
@@ -316,38 +317,88 @@ function sendMessage() {
     isGenerating = true;
     toggleSendStopButton('stop');
 
+    // Tạo message container cho AI response
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', 'ai-message');
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'ai-card';
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    cardDiv.appendChild(contentDiv);
+    messageDiv.appendChild(cardDiv);
+    messagesContainer.appendChild(messageDiv);
+
+    // Tạo text node để append từng từ
+    const textNode = document.createTextNode('');
+    contentDiv.appendChild(textNode);
+
     fetch('https://chat-bot-server-foxw.onrender.com/ask', {
         method: 'POST',
         body: formData,
         signal: signal
     })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`HTTP error! Status: ${res.status}`);
-            }
-            return res.json();
-        })
-        .then(data => {
-            addMessage(data.reply, 'ai');
-            scrollToBottom(true); // 👈 Cuộn khi nhận phản hồi
-            if (data.sessionId) {
-                currentSessionId = data.sessionId;
-                localStorage.setItem('sessionId', currentSessionId);
-            }
-            selectedFiles = [];
-        })
-        .catch(err => {
-            addMessage("Lỗi server: " + err.message, 'ai');
-            console.error(err);
-        })
-        .finally(() => {
-            // 👇 Ẩn typing indicator khi xong
-            typingIndicator.style.display = 'none';
-            isGenerating = false;
-            toggleSendStopButton('send');
-        });
+    .then(response => {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
 
-    console.log("Gửi tin nhắn, chuẩn bị hiện 3 chấm");
+        function processStream({ done, value }) {
+            if (done) {
+                if (buffer.length > 0) {
+                    try {
+                        const data = JSON.parse(buffer);
+                        if (data.content) {
+                            textNode.textContent += data.content;
+                            scrollToBottom(true);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing final buffer:', e);
+                    }
+                }
+                return;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const data = line.slice(6);
+                    if (data === '[DONE]') {
+                        return;
+                    }
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (parsed.content) {
+                            textNode.textContent += parsed.content;
+                            scrollToBottom(true);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing stream data:', e);
+                    }
+                }
+            }
+
+            return reader.read().then(processStream);
+        }
+
+        return reader.read().then(processStream);
+    })
+    .catch(err => {
+        if (err.name === 'AbortError') {
+            console.log('Fetch aborted');
+        } else {
+            console.error('Stream error:', err);
+            contentDiv.textContent = "Lỗi server: " + err.message;
+        }
+    })
+    .finally(() => {
+        typingIndicator.style.display = 'none';
+        isGenerating = false;
+        toggleSendStopButton('send');
+        selectedFiles = [];
+    });
 }
 
 function addMessage(content, sender) {
