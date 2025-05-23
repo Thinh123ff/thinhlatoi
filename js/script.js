@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load tin nhắn cũ nếu có
     loadConversationHistory();
-
     // Load saved theme preference
     loadThemePreference();
 
@@ -86,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const removeBtn = document.createElement('span');
                 removeBtn.className = 'remove-file';
-                removeBtn.innerHTML = '❌';
+                removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x-icon lucide-circle-x"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>';
                 removeBtn.title = 'Xoá file';
 
                 // Sự kiện xoá file
@@ -104,8 +103,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function updateFileDisplay() {
-        const fileDisplay = document.getElementById('fileDisplay');
-        if (!fileDisplay) return;
+        let fileDisplay = document.getElementById('fileDisplay');
+        if (!fileDisplay) {
+            fileDisplay = document.createElement('div');
+            fileDisplay.id = 'fileDisplay';
+            fileDisplay.className = 'file-display';
+
+            const inputContainer = document.querySelector('.input-container');
+            if (inputContainer) {
+                inputContainer.insertBefore(fileDisplay, inputContainer.firstChild);
+            }
+        }
 
         fileDisplay.innerHTML = '';
 
@@ -115,7 +123,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const icon = document.createElement('div');
             icon.className = 'file-icon-container';
-            icon.textContent = getFileIcon(file.name);
+
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.style.width = '40px';
+                img.style.height = '40px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '4px';
+                icon.appendChild(img);
+            } else {
+                icon.textContent = getFileIcon(file.name);
+            }
 
             const fileName = document.createElement('span');
             fileName.className = 'file-name';
@@ -123,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const removeBtn = document.createElement('span');
             removeBtn.className = 'remove-file';
-            removeBtn.innerHTML = '❌';
+            removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x-icon lucide-circle-x"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>';
             removeBtn.title = 'Xoá file';
             removeBtn.addEventListener('click', () => {
                 selectedFiles.splice(index, 1);
@@ -246,7 +265,7 @@ function updateLayout() {
 
 // Tải lịch sử hội thoại từ server
 function loadConversationHistory() {
-    fetch(`https://chat-bot-server-foxw.onrender.com/conversation/${currentSessionId}`)
+    fetch(`http://localhost:5000/conversation/${currentSessionId}`)
         .then(res => {
             if (!res.ok) {
                 // Nếu không tìm thấy phiên (mã lỗi 404), tạo phiên mới
@@ -330,12 +349,21 @@ function sendMessage() {
 
     let fullText = '';
 
-fetch('https://chat-bot-server-foxw.onrender.com/ask', {
+fetch('http://localhost:5000/ask', {
     method: 'POST',
     body: formData,
     signal: signal
 })
 .then(response => {
+    if (!response.ok) {
+        return response.json().then(data => {
+            showToast(data.reply);
+            typingIndicator.style.display = 'none';
+            isGenerating = false;
+            toggleSendStopButton('send');
+            selectedFiles = [];
+        });
+    }
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
@@ -380,7 +408,8 @@ fetch('https://chat-bot-server-foxw.onrender.com/ask', {
             console.log('Fetch aborted');
         } else {
             console.error('Stream error:', err);
-            contentDiv.textContent = "Lỗi server: " + err.message;
+            showToast("" + err.message); // ✅ chỉ hiển thị toast
+            messageDiv.remove(); // ✅ Xoá luôn khung chat lỗi nếu cần
         }
     })
     .finally(() => {
@@ -473,9 +502,19 @@ function formatMessage(text) {
 
 function scrollToBottom(force = false) {
     setTimeout(() => {
+        if (force) {
+            messagesContainer.scrollTo({
+                top: messagesContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        } else {
         const isNearBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 200;
-        if (force || isNearBottom) {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            if (isNearBottom) {
+                messagesContainer.scrollTo({
+                    top: messagesContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
         }
     }, 0);
 }
@@ -518,6 +557,26 @@ function stopResponse() {
     sendBtn.disabled = userInput.value.trim() === '';
 }
 
+    document.addEventListener('paste', async function (event) {
+        if (!event.clipboardData || !event.clipboardData.items) return;
+
+        const items = event.clipboardData.items;
+        for (const item of items) {
+            if (item.type.indexOf('image') !== -1) {
+                const blob = item.getAsFile();
+                if (selectedFiles.length >= 4) {
+                    alert('❌ Bạn chỉ được chọn tối đa 4 file.');
+                    return;
+                }
+
+                // Tạo tên file giả lập
+                const fakeFile = new File([blob], `screenshot-${Date.now()}.png`, { type: blob.type });
+                selectedFiles.push(fakeFile);
+                updateFileDisplay();
+            }
+        }
+    });
+
 // Lắng nghe thay đổi chế độ màu của hệ thống
 if (window.matchMedia) {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
@@ -532,83 +591,21 @@ if (window.matchMedia) {
         }
     });
 }
-function disableUploadButton() {
-    uploadBtn.classList.add('disabled');
-    uploadBtn.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-    };
-}
-disableUploadButton();
 
-function archiveCurrentConversation() {
-    const allChats = JSON.parse(localStorage.getItem('savedConversations') || '[]');
-    const htmlContent = messagesContainer.innerHTML;
-    if (!htmlContent.trim()) return;
-
-    const title = messagesContainer.querySelector('.user-message .message-content')?.textContent?.slice(0, 30) || 'Cuộc trò chuyện';
-
-    allChats.push({
-        id: currentSessionId,
-        title: title + '...',
-        content: htmlContent,
-        isActive: false
-    });
-
-    localStorage.setItem('savedConversations', JSON.stringify(allChats));
+clearBtn.addEventListener('click', function () {
     messagesContainer.innerHTML = '';
-    currentSessionId = generateSessionId();
-    localStorage.setItem('sessionId', currentSessionId);
     updateLayout();
-    renderSavedConversations();
-}
-
-function loadConversationFromMenu(sessionId) {
-    const allChats = JSON.parse(localStorage.getItem('savedConversations') || '[]');
-
-    // Lưu lại cuộc trò chuyện hiện tại trước khi chuyển
-    const htmlContent = messagesContainer.innerHTML;
-    if (htmlContent.trim()) {
-        const existing = allChats.find(c => c.id === currentSessionId);
-        if (existing) {
-            existing.content = htmlContent;
-        } else {
-            allChats.push({
-                id: currentSessionId,
-                title: 'Cuộc trò chuyện chưa đặt tên...',
-                content: htmlContent,
-                isActive: false
-            });
-        }
-    }
-
-    const selected = allChats.find(c => c.id === sessionId);
-    if (selected) {
-        messagesContainer.innerHTML = selected.content;
-        currentSessionId = selected.id;
-        localStorage.setItem('sessionId', currentSessionId);
-    }
-
-    localStorage.setItem('savedConversations', JSON.stringify(allChats));
-    renderSavedConversations();
-    updateLayout();
-}
-
-function renderSavedConversations() {
-    const menuContent = document.querySelector('.menu-content');
-    if (!menuContent) return;
-    menuContent.innerHTML = '';
-
-    const allChats = JSON.parse(localStorage.getItem('savedConversations') || '[]');
-    allChats.forEach(chat => {
-        const item = document.createElement('div');
-        item.className = 'conversation-item';
-        item.textContent = chat.title;
-        item.onclick = () => loadConversationFromMenu(chat.id);
-        menuContent.appendChild(item);
-    });
-}
-
-// Gọi ngay khi load
-renderSavedConversations();
 });
+});
+function showToast(message, duration = 6000) {
+    const toastContainer = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, duration);
+}

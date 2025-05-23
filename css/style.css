@@ -7,6 +7,29 @@
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     --radius: 12px;
 }
+/* Scrollbar tổng thể */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+/* Track — phần nền của scrollbar */
+::-webkit-scrollbar-track {
+    background: #2e2e2e;
+    border-radius: 4px;
+}
+
+/* Thumb — phần thanh cuộn */
+::-webkit-scrollbar-thumb {
+    background-color: #6b6b6b;
+    border-radius: 4px;
+    border: 2px solid #2e2e2e;
+}
+
+/* Khi hover vào thumb */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #888;
+}
 * {
     margin: 0;
     padding: 0;
@@ -233,7 +256,7 @@ pre code.hljs {
 .message-content code {
     font-family: Consolas, monospace;
     font-size: 14px;
-    background-color: #2c2c2c;
+    background-color: #494949d9;
     color: #f3f3f3;
     padding: 2px 4px;
     border-radius: 4px;
@@ -263,6 +286,7 @@ pre code.hljs {
     background-color: #232323;
     color: #f8f8f2;
     border-radius: 8px;
+    border: 1px solid #323232;
     font-size: 14px;
     overflow-x: auto;
     max-width: 100%;
@@ -381,12 +405,13 @@ pre code.hljs {
     position: relative;
     background-color: var(--white);
     border-radius: 30px;
-    border: 1px solid darkgrey;
+    border: 1px solid #474747;
     box-shadow: var(--shadow);
     padding: 0 8px 8px 8px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* giữ input dính đáy */
+    justify-self: center;
+    width: 103%;
     height: auto;
     max-height: 300px;
     overflow: hidden;
@@ -564,14 +589,6 @@ textarea {
 .dark-mode .file-icon-container {
     background-color: #384151;
 }
-.tool-btn.disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-    pointer-events: auto;
-}
-.tool-btn.disabled:hover svg {
-    opacity: 0.5;
-}
 .conversation-item {
     padding: 8px 10px;
     font-size: 15px;
@@ -703,7 +720,7 @@ textarea {
 
     .message-content pre {
         font-size: 13px;
-        background-color: #1e1e1e;
+        background-color: #232323;
         color: #f8f8f2;
         border-radius: 8px;
         overflow-x: auto;
@@ -799,19 +816,42 @@ textarea {
 .copy-btn:hover {
     background: #5649c0;
 }
-.locked-button {
-    cursor: not-allowed !important;
-    opacity: 0.5;
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.toast {
+    background-color: #EF5350;
+    color: white;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    opacity: 0.95;
+    animation: fadein 0.3s, fadeout 0.3s 4s;
+}
+
+@keyframes fadein {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 0.95; transform: translateX(0); }
+}
+
+@keyframes fadeout {
+    from { opacity: 0.95; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(100%); }
 }
 /* Dark mode */
 .dark-mode {
-    --light-bg: #292a2d;
-    --white: #2a2a2f;
+    --light-bg: #1f2023;
+    --white: #27292f;
     --text-color: #e6e6e6;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 .dark-mode .header {
-    background-color: #292a2d;
+    background-color: #1f2023;
 }
 .dark-mode .logo {
     color: var(--secondary-color);

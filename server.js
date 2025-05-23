@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: './.env' });
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const csvParse = require('csv-parse/sync');
@@ -14,6 +14,9 @@ const upload = multer({ dest: 'uploads/' });
 
 app.use(cors({
     origin: [
+        'http://localhost:63342',
+        'http://127.0.0.1:5500',
+        'http://localhost:5000',
         'https://thinhnt-mr.github.io',
         'https://cron-job.org'
     ]
@@ -21,24 +24,19 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static('public'));
 
-// Lưu trữ phiên hội thoại
 const sessions = {};
 
-// Hàm đếm token từ messages
 function countTokensFromMessages(messages) {
-    const flatContent = messages
-        .map(msg => {
-            if (typeof msg.content === 'string') return msg.content;
-            if (Array.isArray(msg.content)) {
-                return msg.content.map(item => item.text || '').join(' ');
-            }
-            return '';
-        })
-        .join(' ');
+    const flatContent = messages.map(msg => {
+        if (typeof msg.content === 'string') return msg.content;
+        if (Array.isArray(msg.content)) {
+            return msg.content.map(item => item.text || '').join(' ');
+        }
+        return '';
+    }).join(' ');
     return encode(flatContent).length;
 }
 
-// Tạo hoặc lấy phiên hội thoại
 function getOrCreateSession(sessionId) {
     if (!sessions[sessionId]) {
         sessions[sessionId] = {
@@ -71,6 +69,24 @@ Ví dụ:
 - Biết điều chỉnh **giọng văn** tùy theo nội dung: kỹ thuật → chi tiết; đời sống → đơn giản, dễ hiểu.
 - Nếu mô tả sự khác biệt, hãy tạo bảng ✅❌ để so sánh, giúp người đọc dễ hiểu hơn.
 - Kết thúc trả lời có thể hỏi lại nhẹ nhàng, thân thiện thêm icon phù hợp ngữ cảnh.
+
+📷 Nếu người dùng tải lên ảnh:
+
+- **Phân tích nội dung ảnh** và **mô tả lại ngắn gọn** cho người dùng dễ hình dung.
+- **Nếu ảnh là đoạn code, ảnh chụp màn hình terminal hoặc đoạn văn bản:**
+  - **Đọc và trích xuất nội dung** trong ảnh.
+  - **Phân tích nội dung ảnh**, đưa ra nhận xét hoặc thực hiện theo yêu cầu liên quan đến ảnh (như giải thích đoạn code, phân tích lỗi, kiểm tra thông tin…).
+  - Nếu không rõ nội dung, **yêu cầu người dùng mô tả thêm hoặc gửi lại ảnh rõ hơn**.
+- **Nếu ảnh là giao diện UI/UX hoặc thiết kế web/app:**
+  - Nhận xét về bố cục, màu sắc, cách sắp xếp thành phần giao diện.
+  - Góp ý cải thiện nếu cần thiết.
+  - Có thể đề xuất đoạn code tương ứng nếu người dùng yêu cầu chuyển từ ảnh sang code.
+- **Nếu ảnh thuộc chủ đề khác** (ảnh meme, ảnh sản phẩm, ảnh vật thể,…)
+  - Nhận diện chủ đề và nội dung chính trong ảnh.
+  - Đưa ra nhận xét hài hước, thân thiện hoặc phân tích ngữ cảnh nếu phù hợp.
+  - Nếu không rõ, hỏi lại người dùng ảnh đó muốn xử lý hay hỏi gì.
+
+**Kết thúc trả lời có thể thêm biểu tượng cảm xúc phù hợp 📸🎨📑 để làm nhẹ nhàng và tự nhiên.**
 
 📁 Nếu người dùng tải lên file:
 
@@ -138,13 +154,13 @@ Hoặc:
 `
                 }
             ],
-            createdAt: new Date()
+            createdAt: new Date(),
+            requestTimestamps: []
         };
     }
     return sessions[sessionId];
 }
 
-// Dọn dẹp phiên hết hạn (phiên cũ hơn 24 giờ)
 function cleanupSessions() {
     const now = new Date();
     Object.keys(sessions).forEach(id => {
@@ -155,8 +171,6 @@ function cleanupSessions() {
         }
     });
 }
-
-// Chạy dọn dẹp mỗi giờ
 setInterval(cleanupSessions, 1000 * 60 * 60);
 
 app.post('/ask', upload.array('files'), async (req, res) => {
@@ -166,10 +180,21 @@ app.post('/ask', upload.array('files'), async (req, res) => {
 
     try {
         const session = getOrCreateSession(sessionId);
+        // Giới hạn lượt câu hỏi/session: tối đa 5 câu
+        const userQuestionCount = session.messages.filter(m => m.role === 'user').length;
+        if (userQuestionCount >= 5) {
+            return res.status(429).json({ reply: "Bạn đã dùng hết 5 lượt trong phiên này. Vui lòng thử lại sau." });
+        }
 
-        const content = [
-            { type: 'text', text: `\n${message}` }
-        ];
+        // Giới hạn request nhanh: tối đa 5 request/phút
+        const now = Date.now();
+        session.requestTimestamps = session.requestTimestamps.filter(t => now - t < 60000);
+        if (session.requestTimestamps.length >= 5) {
+            return res.status(429).json({ reply: "⏳ Bạn đang gửi quá nhanh. Vui lòng chờ 1 phút rồi thử lại." });
+        }
+        session.requestTimestamps.push(now);
+
+        const content = [{ type: 'text', text: `\n${message}` }];
 
         for (const file of files) {
             const buffer = fs.readFileSync(file.path);
@@ -179,159 +204,133 @@ app.post('/ask', upload.array('files'), async (req, res) => {
             try {
                 if (mime === 'application/pdf') {
                     const pdfData = await pdfParse(buffer);
-                    content.push({
-                        type: 'text',
-                        text: `📄 **Nội dung từ file PDF _${filename}_**:\n\n${pdfData.text.slice(0, 5000)}`
-                    });
+                    content.push({ type: 'text', text: `📄 ${filename}:\n\n${pdfData.text.slice(0, 5000)}` });
                 } else if (mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
                     const result = await mammoth.extractRawText({ buffer });
-                    content.push({
-                        type: 'text',
-                        text: `📝 **Nội dung từ file Word _${filename}_**:\n\n${result.value.slice(0, 5000)}`
-                    });
+                    content.push({ type: 'text', text: `📝 ${filename}:\n\n${result.value.slice(0, 5000)}` });
                 } else if (mime === 'text/csv') {
                     const csvText = buffer.toString('utf8');
                     const records = csvParse.parse(csvText, { columns: true });
                     const preview = JSON.stringify(records.slice(0, 3), null, 2);
-                    content.push({
-                        type: 'text',
-                        text: `📊 **Dữ liệu CSV từ _${filename}_ (3 dòng đầu)**:\n\n\`\`\`json\n${preview}\n\`\`\``
-                    });
+                    content.push({ type: 'text', text: `📊 ${filename}:\n\n\`\`\`json\n${preview}\n\`\`\`` });
                 } else if (mime.startsWith('image/')) {
                     const base64 = buffer.toString('base64');
-                    content.push({
-                        type: 'image_url',
-                        image_url: {
-                            url: `data:${mime};base64,${base64}`,
-                            detail: 'auto'
-                        }
-                    });
+                    content.push({ type: 'image_url', image_url: { url: `data:${mime};base64,${base64}`, detail: 'auto' } });
                 } else {
                     const textContent = buffer.toString('utf8').slice(0, 5000);
-                    content.push({
-                        type: 'text',
-                        text: `📎 **Nội dung từ file _${filename}_**:\n\n${textContent}`
-                    });
+                    content.push({ type: 'text', text: `📎 ${filename}:\n\n${textContent}` });
                 }
             } catch (err) {
-                content.push({
-                    type: 'text',
-                    text: `⚠️ Không thể xử lý nội dung từ file _${filename}_.`
-                });
+                content.push({ type: 'text', text: `⚠️ Không thể xử lý file ${filename}` });
             }
         }
 
-        // Thêm tin nhắn người dùng vào phiên
-        session.messages.push({
-            role: 'user',
-            content: content
-        });
+        session.messages.push({ role: 'user', content: content });
 
-        // Giới hạn số lượng tin nhắn để không vượt quá token
-        const maxMessagesToKeep = 10; // Có thể điều chỉnh theo nhu cầu
-        if (session.messages.length > maxMessagesToKeep + 1) { // +1 cho system message
-            session.messages = [
-                session.messages[0], // Giữ system message
-                ...session.messages.slice(-(maxMessagesToKeep))
-            ];
+        if (session.messages.length > 6) {
+            session.messages = [session.messages[0], ...session.messages.slice(-5)];
         }
 
-        const tokenLimit = 8000;
+        const tokenLimit = 6000;
         const promptTokens = countTokensFromMessages(session.messages);
-        const safeMaxTokens = tokenLimit - promptTokens;
+        const safeMaxTokens = Math.max(tokenLimit - promptTokens, 500);
 
-        console.log('Đang gửi yêu cầu đến OpenRouter...');
+        console.log('Đang gửi yêu cầu đến OpenAI...');
         console.log(`promptTokens: ${promptTokens}, max_tokens: ${safeMaxTokens}`);
         console.log(`Session ${sessionId} có ${session.messages.length} tin nhắn`);
 
-        if (promptTokens >= tokenLimit - 100) {
-            console.warn(`Cảnh báo: promptTokens (${promptTokens}) gần vượt giới hạn token (${tokenLimit}).`);
+        let response;
+        try {
+            response = await sendToOpenAI(process.env.OPENAI_API_KEY_1, session.messages, safeMaxTokens);
+        } catch (err) {
+            if (err.response?.status === 429) {
+                console.warn("⚠️ Key 1 bị giới hạn, thử dùng Key 2...");
+                try {
+                    response = await sendToOpenAI(process.env.OPENAI_API_KEY_2, session.messages, safeMaxTokens);
+                } catch (err2) {
+                    console.error("🚫 Key 2 cũng bị lỗi:", err2.response?.data || err2.message);
+                    return res.status(500).json({ reply: "Cả hai API key đều bị giới hạn. Vui lòng thử lại sau vài phút." });
+                }
+            } else {
+                throw err; // Nếu lỗi khác 429 → ném ra để xử lý như cũ
+            }
         }
 
-        const response = await axios.post(
-            'https://openrouter.ai/api/v1/chat/completions',
-            {
-                model: 'openai/gpt-4o',
-                messages: session.messages,
-                max_tokens: safeMaxTokens,
-                temperature: 0.7,
-                stream: true  // Bật chế độ stream
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                    'HTTP-Referer': 'http://localhost:5000',
-                    'Content-Type': 'application/json'
-                },
-                responseType: 'stream',  // Thêm responseType stream
-                timeout: 120000
-            }
-        );
-
-        // Xoá file tạm
         files.forEach(f => fs.unlinkSync(f.path));
 
-        // Thiết lập response headers cho streaming
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
         let fullResponse = '';
 
-        // Xử lý stream response
         response.data.on('data', chunk => {
             const lines = chunk.toString().split('\n');
             for (const line of lines) {
                 if (line.startsWith('data: ')) {
                     const data = line.slice(6);
                     if (data === '[DONE]') {
-                        // Kết thúc stream
                         res.write(`data: [DONE]\n\n`);
                         res.end();
-                        
-                        // Lưu toàn bộ response vào session
-                        session.messages.push({
-                            role: 'assistant',
-                            content: fullResponse
-                        });
+                        session.messages.push({ role: 'assistant', content: fullResponse });
                         return;
                     }
-                    
                     try {
                         const parsed = JSON.parse(data);
-                        if (parsed.choices?.[0]?.delta?.content) {
-                            const content = parsed.choices[0].delta.content;
+                        const content = parsed.choices?.[0]?.delta?.content;
+                        if (content) {
                             fullResponse += content;
                             res.write(`data: ${JSON.stringify({ content })}\n\n`);
                         }
                     } catch (e) {
-                        console.error('Error parsing stream data:', e);
+                        console.error('Lỗi phân tích stream:', e);
                     }
                 }
             }
         });
 
         response.data.on('error', err => {
-            console.error('Stream error:', err);
-            res.status(500).json({ reply: "Lỗi khi nhận phản hồi từ OpenRouter" });
+            console.error('Lỗi stream:', err);
+            res.status(500).json({ reply: "Lỗi khi nhận phản hồi từ OpenAI" });
         });
     } catch (err) {
-        console.error('Lỗi khi gọi API OpenRouter:');
+        console.error('Lỗi khi gọi OpenAI:');
         if (err.response) {
             console.error('Mã lỗi:', err.response.status);
             console.error('Dữ liệu lỗi:', err.response.data);
             res.status(500).json({
-                reply: `Lỗi từ OpenRouter: ${err.response.data?.error?.message || 'Không xác định'}`
+                reply: `Lỗi từ OpenAI: ${err.response.data?.error?.message || 'Không xác định'}`
             });
         } else if (err.request) {
             console.error('Không nhận được phản hồi:', err.request);
-            res.status(500).json({ reply: "Không nhận được phản hồi từ OpenRouter. Vui lòng kiểm tra kết nối mạng." });
+            res.status(500).json({ reply: "Không nhận được phản hồi từ OpenAI." });
         } else {
             console.error('Lỗi:', err.message);
             res.status(500).json({ reply: `Lỗi khi gửi yêu cầu: ${err.message}` });
         }
     }
 });
+
+async function sendToOpenAI(apiKey, sessionMessages, maxTokens) {
+    return await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+            model: 'gpt-4o',
+            messages: sessionMessages,
+            max_tokens: maxTokens,
+            temperature: 0.7,
+            stream: true
+        },
+        {
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            responseType: 'stream',
+            timeout: 120000
+        }
+    );
+}
 
 // API lấy lịch sử hội thoại
 app.get('/conversation/:sessionId', (req, res) => {
@@ -360,9 +359,9 @@ app.delete('/conversation/:sessionId', (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server đang chạy tại http://localhost:${port}`);
-    if (!process.env.OPENROUTER_API_KEY) {
-        console.error('CẢNH BÁO: OPENROUTER_API_KEY không được thiết lập!');
+    if (!process.env.OPENAI_API_KEY) {
+        console.error('⚠️ OPENAI_API_KEY chưa được thiết lập trong .env');
     } else {
-        console.log('OPENROUTER_API_KEY đã được cấu hình.');
+        console.log('✅ OPENAI_API_KEY đã được cấu hình.');
     }
 });
