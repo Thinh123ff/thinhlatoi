@@ -265,7 +265,7 @@ function updateLayout() {
 
 // Tải lịch sử hội thoại từ server
 function loadConversationHistory() {
-    fetch(`http://localhost:5000/conversation/${currentSessionId}`)
+    fetch(`https://chat-bot-server-foxw.onrender.com/conversation/${currentSessionId}`)
         .then(res => {
             if (!res.ok) {
                 // Nếu không tìm thấy phiên (mã lỗi 404), tạo phiên mới
@@ -349,7 +349,7 @@ function sendMessage() {
 
     let fullText = '';
 
-fetch('http://localhost:5000/ask', {
+fetch('https://chat-bot-server-foxw.onrender.com/ask', {
     method: 'POST',
     body: formData,
     signal: signal
@@ -609,3 +609,38 @@ function showToast(message, duration = 6000) {
         toast.remove();
     }, duration);
 }
+document.querySelectorAll('.sphere-container').forEach(container => {
+    const sphere = container.querySelector('.sphere');
+
+    container.addEventListener('click', () => {
+        // Create ripple effect
+        const ripple = document.createElement('div');
+        ripple.style.position = 'absolute';
+        ripple.style.top = '50%';
+        ripple.style.left = '50%';
+        ripple.style.width = '0';
+        ripple.style.height = '0';
+        ripple.style.border = '1px solid rgba(255, 255, 255, 0.6)';
+        ripple.style.borderRadius = '50%';
+        ripple.style.transform = 'translate(-50%, -50%)';
+        ripple.style.animation = 'rippleExpand 0.6s ease-out forwards';
+        ripple.style.pointerEvents = 'none';
+
+        container.appendChild(ripple);
+
+        // Add ripple animation if not exists
+        if (!document.getElementById('rippleStyle')) {
+            const style = document.createElement('style');
+            style.id = 'rippleStyle';
+            style.textContent = `
+                        @keyframes rippleExpand {
+                            0% { width: 0; height: 0; opacity: 0.8; }
+                            100% { width: 200px; height: 200px; opacity: 0; }
+                        }
+                    `;
+            document.head.appendChild(style);
+        }
+
+        setTimeout(() => ripple.remove(), 600);
+    });
+});

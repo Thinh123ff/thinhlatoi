@@ -1,9 +1,9 @@
-require('dotenv').config({ path: './.env' });
+require('dotenv').config();
+const axios = require('axios');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const csvParse = require('csv-parse/sync');
 const { encode } = require('gpt-3-encoder');
-const axios = require('axios');
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
