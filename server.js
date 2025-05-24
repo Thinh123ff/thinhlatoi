@@ -183,7 +183,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
         // Giới hạn lượt câu hỏi/session: tối đa 5 câu
         const userQuestionCount = session.messages.filter(m => m.role === 'user').length;
         if (userQuestionCount >= 5) {
-            return res.status(429).json({ reply: "Bạn đã dùng hết 5 lượt trong phiên này. Vui lòng thử lại sau." });
+            return res.status(429).json({ reply: "Bạn đã dùng hết 5 lượt trong hôm nay. Vui lòng thử lại sau." });
         }
 
         // Giới hạn request nhanh: tối đa 5 request/phút
@@ -231,9 +231,14 @@ app.post('/ask', upload.array('files'), async (req, res) => {
             session.messages = [session.messages[0], ...session.messages.slice(-5)];
         }
 
-        const tokenLimit = 6000;
+        const tokenLimit = 10000;
         const promptTokens = countTokensFromMessages(session.messages);
-        const safeMaxTokens = Math.max(tokenLimit - promptTokens, 500);
+        const safeMaxTokens = Math.max(800, tokenLimit - promptTokens);
+
+        session.messages.push({ role: 'assistant', content: fullResponse });
+        // Tính lại Token
+        const completionTokens = encode(fullResponse).length;
+        console.log(`completionTokens: ${completionTokens}, totalTokens: ${promptTokens + completionTokens}`);
 
         console.log('Đang gửi yêu cầu đến OpenAI...');
         console.log(`promptTokens: ${promptTokens}, max_tokens: ${safeMaxTokens}`);

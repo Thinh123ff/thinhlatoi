@@ -240,8 +240,8 @@ body {
     white-space: normal;
 }
 .message-content p{
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-top: 15px;
+    padding-bottom: 15px;
     color: black;
     font-size: 17px;
 }
@@ -831,10 +831,10 @@ textarea {
     right: 20px;
     z-index: 9999;
 }
-
 .toast {
-    background-color: #EF5350;
-    color: white;
+    background-color: black;
+    color: red;
+    font-weight: bold;
     padding: 8px 10px;
     margin-bottom: 10px;
     border-radius: 6px;
@@ -842,7 +842,6 @@ textarea {
     opacity: 0.95;
     animation: fadein 0.3s, fadeout 0.3s 4s;
 }
-
 @keyframes fadein {
     from { opacity: 0; transform: translateX(100%); }
     to { opacity: 0.95; transform: translateX(0); }
