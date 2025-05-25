@@ -361,6 +361,10 @@ app.delete('/conversation/:sessionId', (req, res) => {
     }
 });
 
+app.get('/ping', (req, res) => {
+    res.send('pong');
+});
+
 app.listen(port, () => {
     console.log(`Server đang chạy tại http://localhost:${port}`);
     if (!process.env.OPENAI_API_KEY) {
