@@ -178,6 +178,8 @@ app.post('/ask', upload.array('files'), async (req, res) => {
     const files = req.files || [];
     const sessionId = req.body.sessionId || 'default';
 
+    let fullResponse = '';
+
     try {
         const session = getOrCreateSession(sessionId);
         // Giới hạn lượt câu hỏi/session: tối đa 5 câu
@@ -234,8 +236,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
         const tokenLimit = 10000;
         const promptTokens = countTokensFromMessages(session.messages);
         const safeMaxTokens = Math.max(800, tokenLimit - promptTokens);
-
-        session.messages.push({ role: 'assistant', content: fullResponse });
+        
         // Tính lại Token
         const completionTokens = encode(fullResponse).length;
         console.log(`completionTokens: ${completionTokens}, totalTokens: ${promptTokens + completionTokens}`);
@@ -266,8 +267,6 @@ app.post('/ask', upload.array('files'), async (req, res) => {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
-
-        let fullResponse = '';
 
         response.data.on('data', chunk => {
             const lines = chunk.toString().split('\n');
