@@ -103,6 +103,25 @@ Ví dụ:
 - 📌 **Dùng chính xác tên file** trong phần phản hồi gửi lại người dùng để dễ theo dõi.
 - 📑 **Nhắc lại nội dung yêu cầu đã đọc được** trước khi trả lời để xác nhận với người dùng.
 
+🎵 Nếu người dùng tải lên file audio:
+
+- 📝 **Phân tích nội dung lời thoại trong audio** bằng cách sử dụng transcript được trích xuất từ file.
+- 🔍 **Nếu người dùng đặt câu hỏi kèm audio**, hãy ưu tiên dựa vào nội dung lời thoại trong audio để trả lời câu hỏi.
+- 📌 Nếu nội dung audio chứa các thông tin mô tả hoặc hội thoại, hãy tóm tắt lại nội dung chính và trả lời theo ngữ cảnh đó.
+- 📝 Nếu audio là bản tin, bài diễn thuyết, hay hướng dẫn:
+  - Tóm tắt lại nội dung chính.
+  - Đưa ra nhận xét hoặc giải thích nếu cần.
+- ❗ Nếu nội dung audio không rõ hoặc quá ngắn:
+  - Gợi ý người dùng gửi file rõ hơn hoặc đặt câu hỏi chi tiết kèm theo.
+- 🎶 Nếu audio là nhạc, bài hát:
+  - Nhận xét hoặc mô tả về nội dung lời bài hát nếu có.
+  - Nếu là đoạn beat hoặc instrumental, hãy nhận xét về giai điệu hoặc nhạc cụ nếu transcript không khả dụng.
+
+✅ Khi trả lời:
+- Trình bày ngắn gọn, rõ ràng, bằng tiếng Việt.
+- Nếu cần tóm tắt nội dung audio, hãy ghi rõ: **"Tóm tắt nội dung audio:"** trước đoạn tóm tắt.
+- Nếu có câu hỏi đi kèm, hãy trả lời câu hỏi đó dựa trên transcript đã phân tích được.
+
 📌 Tránh trả lời hời hợt hoặc “không biết”. Nếu chưa chắc, hãy hỏi lại để làm rõ.
 
 🌐 Nếu câu hỏi liên quan đến: link, website, địa chỉ trang web, tên miền... bạn KHÔNG cần đoán hay tạo ra. Hệ thống sẽ tìm kiếm web và hiển thị kết quả. Bạn chỉ phản hồi đơn giản nếu cần.
@@ -218,6 +237,20 @@ app.post('/ask', upload.array('files'), async (req, res) => {
                 } else if (mime.startsWith('image/')) {
                     const base64 = buffer.toString('base64');
                     content.push({ type: 'image_url', image_url: { url: `data:${mime};base64,${base64}`, detail: 'auto' } });
+                } else if (mime.startsWith('audio/')) {
+                    const audioPath = file.path;
+                    const formData = new (require('form-data'))();
+                    formData.append('file', fs.createReadStream(audioPath));
+                    formData.append('model', 'whisper-1');
+
+                    const whisperRes = await axios.post('https://api.openai.com/v1/audio/transcriptions', formData, {
+                        headers: {
+                            'Authorization': `Bearer ${process.env.OPENAI_API_KEY_1}`,
+                            ...formData.getHeaders()
+                        }
+                    });
+
+                    content.push({ type: 'text', text: `🎵 ${filename}:\n\n${whisperRes.data.text}` });
                 } else {
                     const textContent = buffer.toString('utf8').slice(0, 5000);
                     content.push({ type: 'text', text: `📎 ${filename}:\n\n${textContent}` });
