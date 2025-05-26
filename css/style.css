@@ -15,7 +15,7 @@
 
 /* Track — phần nền của scrollbar */
 ::-webkit-scrollbar-track {
-    background: #2e2e2e;
+    background: #3f3f3f;
     border-radius: 4px;
 }
 
@@ -34,8 +34,9 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Inter', 'Helvetica Neue', 'Segoe UI', 'Roboto', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
 }
+
 body {
     background-color: var(--light-bg);
     color: var(--text-color);
@@ -116,7 +117,7 @@ body {
     left: -255px; /* Ẩn ban đầu */
     width: 255px;
     height: 100%;
-    background-color: #272727;
+    background-color: #3f3f3f;
     color: white;
     padding: 10px;
     box-shadow: 2px 0 5px rgba(0,0,0,0.3);
@@ -414,7 +415,7 @@ pre code.hljs {
     position: relative;
     background-color: var(--white);
     border-radius: 30px;
-    border: 1px solid #474747;
+    border: 1px solid rgba(0, 12, 255, 0.2);
     box-shadow: var(--shadow);
     padding: 0 8px 8px 8px;
     display: flex;
@@ -425,6 +426,7 @@ pre code.hljs {
     max-height: 300px;
     overflow: hidden;
 }
+
 .input-area {
     display: flex;
     justify-content: space-between;
@@ -876,7 +878,6 @@ textarea {
 .dark-mode .dark-mode .message-content h1{
     color: var(--text-color);
 }
-
 .dark-mode .message-content h3{
     color: var(--text-color);
 }
