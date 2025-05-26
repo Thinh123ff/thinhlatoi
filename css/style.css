@@ -415,6 +415,7 @@ pre code.hljs {
     position: relative;
     background-color: var(--white);
     border-radius: 30px;
+    border: 1px solid rgba(0, 12, 255, 0.2);
     box-shadow: var(--shadow);
     padding: 0 8px 8px 8px;
     display: flex;
@@ -424,16 +425,8 @@ pre code.hljs {
     height: auto;
     max-height: 300px;
     overflow: hidden;
-    animation: rainbowBorder 15s linear infinite;
 }
-.input-container {
-    border: none;
-}
-.input-container:focus-within {
-    border: 1px solid;
-    box-shadow: var(--shadow);
-    transition: border 2s ease;
-}
+
 .input-area {
     display: flex;
     justify-content: space-between;
