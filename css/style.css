@@ -127,7 +127,7 @@ body {
     left: -255px; /* Ẩn ban đầu */
     width: 255px;
     height: 100%;
-    background:linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("/image/olena-bohovyk-Cq5NaI0yKBE-unsplash.jpg") no-repeat center center;
+    background:linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("../image/olena-bohovyk-Cq5NaI0yKBE-unsplash.jpg") no-repeat center center;
     background-size: cover;
     color: black;
     padding: 10px;
