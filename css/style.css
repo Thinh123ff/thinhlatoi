@@ -124,8 +124,8 @@ body {
 .side-menu {
     position: fixed;
     top: 0;
-    left: -255px; /* Ẩn ban đầu */
-    width: 255px;
+    left: -40vh; /* Ẩn ban đầu */
+    width: 40vh;
     height: 100%;
     background:linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("../image/olena-bohovyk-Cq5NaI0yKBE-unsplash.jpg") no-repeat center center;
     background-size: cover;
@@ -770,7 +770,6 @@ textarea {
         cursor: pointer;
         z-index: 2;
     }
-
     .message-content pre {
         font-size: 13px;
         background-color: #232323;
@@ -784,12 +783,10 @@ textarea {
         line-height: 1.5;
         padding: 10px;
     }
-
     .message-content pre code {
         min-width: 600px;
         display: inline-block;
     }
-
     .message-content table {
         overflow-x: auto;
         max-width: 96vw;
@@ -800,7 +797,6 @@ textarea {
         display: inline-block;
         font-size: 14px;
     }
-
     .message-content th,
     .message-content td {
         font-size: 13px;
@@ -808,14 +804,12 @@ textarea {
         min-width: 100px;
         word-break: break-word;
     }
-
     .chat-container:not(.has-messages) .input-wrapper {
         top: 87vh;
         bottom: auto;
         width: 100%;
         transform: translate(-50%, -50%);
     }
-
     .header {
         position: fixed;
         width: 100%;
@@ -823,32 +817,31 @@ textarea {
         background-color: white;
         z-index: 10;
     }
-
     .logo {
         position: relative;
         font-size: 20px;
         font-weight: bold;
         color: var(--primary-color);
     }
-
+    .side-menu{
+        left: -30vh;
+        width: 30vh;
+    }
     .theme-toggle {
         position: absolute;
     }
-
     .messages {
         width: 100%;
         padding-left: 5px;
         padding-right: 5px;
         overflow-x: hidden;
     }
-
     .message-content p,
     .message-content div,
     .message-content span {
         word-break: break-word;
         white-space: normal;
     }
-
     .initial-state {
         top: 35vh;
     }
