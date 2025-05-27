@@ -98,7 +98,7 @@ body {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: #323232d9;
+    background: #232323;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -169,90 +169,6 @@ body {
     color: white;
     font-size: 12px;
     opacity: 80%;
-}
-#cookie-banner{
-    position:fixed;
-    bottom:20px;
-    left:50%;
-    transform:translateX(-50%);
-    width:90%;
-    max-width:1100px;
-    background-color:rgba(255, 255, 255, 0.97);
-    color:#333;
-    padding:10px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    font-family:'Segoe UI', Roboto, sans-serif;
-    z-index:1000;
-    box-shadow:0 5px 30px rgba(0, 0, 0, 0.15);
-    border-radius:12px;
-    backdrop-filter:blur(10px);
-    border:1px solid rgba(228, 228, 228, 0.8);
-    animation:slidein 0.5s ease-out;
-}
-@keyframes slidein {
-    from{
-        opacity:0;
-        transform:translate(-50%, 100px);
-    }
-    to{
-        opacity:1;
-        transform:translate(-50%, 0);
-    }
-}
-.cookie-content{
-    flex: 1;
-    padding: 10px;
-}
-.cookie-content h2{
-    margin-top:0;
-    margin-bottom:12px;
-    font-size:22px;
-    font-weight:600;
-    color:#222;
-}
-.cookie-content p{
-    margin:0;
-    font-size:15px;
-    line-height:1.6;
-    color:#555;
-}
-.cookie-buttons{
-    display:flex;
-    gap:15px;
-    flex-shrink:0;
-}
-.cookie-buttons button{
-    padding:12px 28px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
-    font-size:15px;
-    transition:all 0.3s ease;
-    box-shadow:0 2px 8px rgba(0, 0, 0, 0.1);
-    outline:none;
-    letter-spacing:0.5px;
-}
-#accept-cookies{
-    background-color:#4285F4;
-    color:white;
-}
-#accept-cookies:hover{
-    background-color:#2b6ed9;
-    transform:translateY(-2px);
-    box-shadow:0 4px 12px rgba(66, 133, 244, 0.3);
-}
-#reject-cookies{
-    background-color:transparent;
-    color:#555;
-    border:1.5px solid #d0d0d0;
-}
-#reject-cookies:hover{
-    background-color:#f2f2f2;
-    transform:translateY(-2px);
-    box-shadow:0 4px 12px rgba(0, 0, 0, 0.08);
 }
 /* Nền overlay */
 .menu-overlay {
@@ -949,24 +865,6 @@ textarea {
         display: flex;
         flex-direction: column;
         padding: 6px;
-    }
-    #cookie-banner{
-        flex-direction:column;
-        align-items:flex-start;
-        padding:20px;
-        bottom:10px;
-    }
-    .cookie-content{
-        padding-right:0;
-        padding-bottom:15px;
-    }
-    .cookie-buttons{
-        width:100%;
-    }
-    .cookie-buttons button{
-        flex:1;
-        text-align:center;
-        padding:12px 15px;
     }
 }
 .copy-btn {
