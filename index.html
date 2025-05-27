@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/style.css?v=1.1.6">
+  <link rel="stylesheet" href="css/style.css?v=1.2.0">
   <title>Askiva</title>
 
   <meta name="description" content="Công cụ AI trả lời tự động bằng tiếng Việt – hỗ trợ hỏi đáp, học tập, công nghệ, lập trình, kỹ năng và hơn thế nữa." />
@@ -40,13 +40,21 @@
     </div>
     <nav id="sideMenu" class="side-menu">
       <div class="logo">
-        <img src="image/cu-meo-no-nen.svg" width="70" height="70">
+        <img src="image/cu-meo.svg" width="70" height="70"><br><br>
+        <div class="new-chat">
+          <button class="tool-btn" id="clearBtn" title="Cuộc trò chuyện mới">
+            <!-- icon xóa -->
+            <svg id="new-chat" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle-plus-icon lucide-message-circle-plus"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M8 12h8"/><path d="M12 8v8"/></svg><span>New chat</span>
+          </button>
+        </div>
       </div>
       <div class="menu-content">
-
+        <a href="chinhsach.html">Chính sách</a>
+        <a href="dienkhoan.html">Điền khoản</a>
+        <a href="cookie.html">Cookies</a>
       </div>
       <div class="copyright">
-        <p id="menu-copyright">© 2025 Askiva. 1.1.6</p>
+        <p id="menu-copyright">© 2025 Askiva. 1.2.0</p>
       </div>
     </nav>
     <div>
@@ -100,14 +108,7 @@
             </button>
             <button class="tool-btn" id="uploadFileBtn" title="Tải tệp đính kèm">
               <!-- icon file -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paperclip-icon lucide-paperclip"><path d="M13.234 20.252 21 12.3"/><path d="m16 6-8.414 8.586a2 2 0 0 0 0 2.828 2 2 0 0 0 2.828 0l8.414-8.586a4 4 0 0 0 0-5.656 4 4 0 0 0-5.656 0l-8.415 8.585a6 6 0 1 0 8.486 8.486"/></svg>
-            </button>
-            <button class="tool-btn" id="clearBtn" title="Xóa cuộc trò chuyện">
-              <!-- icon xóa -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paperclip-icon lucide-paperclip"><path d="M13.234 20.252 21 12.3"/><path d="m16 6-8.414 8.586a2 2 0 0 0 0 2.828 2 2 0 0 0 2.828 0l8.414-8.586a4 4 0 0 0 0-5.656 4 4 0 0 0-5.656 0l-8.415 8.585a6 6 0 1 0 8.486 8.486"/></svg>
             </button>
           </div>
           <div>
@@ -124,7 +125,17 @@
     </div>
   </div>
 </div>
-<script src="js/script.js?v=2.1"></script>
+<div id="cookie-banner" style="display: none;">
+  <div class="cookie-content">
+    <h2 id="cookie-h3">Chúng tôi sử dụng cookie!</h2>
+    <p id="cookie-title">Trang này sử dụng cookie để nâng cao trải nghiệm người dùng. Bằng cách tiếp tục truy cập, bạn đồng ý với chính sách sử dụng cookie. <a href="cookie.html">Tìm hiểu thêm</a></p>
+  </div>
+  <div class="cookie-buttons">
+    <button id="accept-cookies">Chấp nhận</button>
+    <button id="reject-cookies">Từ chối</button>
+  </div>
+</div>
+<script src="js/script.js?v=2.3"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
   function hasVerifiedToday() {

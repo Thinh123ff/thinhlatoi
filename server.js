@@ -1,4 +1,5 @@
 require('dotenv').config();
+console.log("🔑 BRAVE_API_KEY: Đã cấu hình",);
 const axios = require('axios');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
@@ -18,7 +19,6 @@ app.use(cors({
         'http://127.0.0.1:5500',
         'http://localhost:5000',
         'https://thinhnt-mr.github.io',
-        'https://cron-job.org'
     ]
 }));
 app.use(express.json());
@@ -55,10 +55,10 @@ Bạn là một trợ lý AI thông minh, luôn trả lời bằng tiếng Việ
 - Có thể trình bày dạng bảng nếu phù hợp.
 Ví dụ:
 
-| Món Ăn | Loại |
-|:------------|:----------------|
-| 🍲 Canh cá lóc | Món canh |
-| 🍗 Cánh gà chiên mắm | Món chiên |
+| Món Ăn               |      Loại       |
+|----------------------|-----------------|
+| 🍲 Canh cá lóc       |     Món canh    |
+| 🍗 Cánh gà chiên mắm |     Món chiên   |
 
 - Nếu có nội dung dạng liệt kê, hãy dùng **danh sách gạch đầu dòng**.
 - Nếu nội dung có thể phân loại, hãy dùng **bảng markdown**.
@@ -124,7 +124,10 @@ Ví dụ:
 
 📌 Tránh trả lời hời hợt hoặc “không biết”. Nếu chưa chắc, hãy hỏi lại để làm rõ.
 
-🌐 Nếu câu hỏi liên quan đến: link, website, địa chỉ trang web, tên miền... bạn KHÔNG cần đoán hay tạo ra. Hệ thống sẽ tìm kiếm web và hiển thị kết quả. Bạn chỉ phản hồi đơn giản nếu cần.
+🌐 Nếu câu hỏi liên quan đến: link, website, địa chỉ trang web, tên miền... hãy **hiển thị rõ các đường link hữu ích từ kết quả tìm kiếm web (Brave)**. Nếu có nhiều kết quả, hãy:
+- Hiển thị tiêu đề, link và mô tả.
+- Trình bày bằng danh sách hoặc bảng markdown nếu phù hợp.
+- Không cần che giấu hay bỏ qua các link web an toàn từ kết quả tìm kiếm.
 
 🧠 Phạm vi hỗ trợ:
 - Lập trình, kỹ thuật, tài liệu, học tập, nấu ăn, sức khỏe cơ bản, kỹ năng mềm, kinh doanh nhỏ.
@@ -140,8 +143,6 @@ Ví dụ:
   - Gợi ý hướng xử lý khác hoặc khuyên người dùng tham khảo nguồn phù hợp.
 
 💡 Mục tiêu: Đảm bảo câu trả lời **có trách nhiệm, dễ hiểu, không bỏ sót và tạo cảm giác được hỗ trợ nhiệt tình.**
-
-🌐 Nếu câu hỏi liên quan đến: link, website, địa chỉ trang web, tên miền... bạn KHÔNG cần đoán hay tạo ra. Hệ thống sẽ tìm kiếm web và hiển thị kết quả. Bạn chỉ phản hồi đơn giản nếu cần.
 
 🧠 Ghi nhớ và sử dụng ngữ cảnh hội thoại:
 
@@ -196,6 +197,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
     const message = req.body.message || '';
     const files = req.files || [];
     const sessionId = req.body.sessionId || 'default';
+    const content = [{ type: 'text', text: `\n${message}` }];
 
     let fullResponse = '';
 
@@ -215,7 +217,14 @@ app.post('/ask', upload.array('files'), async (req, res) => {
         }
         session.requestTimestamps.push(now);
 
-        const content = [{ type: 'text', text: `\n${message}` }];
+        if (/tìm (trên mạng|web|Google|Bing|internet|link tải|công cụ|trang web|download)/i.test(message)) {
+            const searchResult = await searchBrave(message);
+
+            content.push({
+                type: 'text',
+                text: `📡 **Kết quả từ Brave Search (web):**\n\n${searchResult}\n\n👉 Vui lòng sử dụng thông tin này để hỗ trợ người dùng tốt nhất.`
+            });
+        }
 
         for (const file of files) {
             const buffer = fs.readFileSync(file.path);
@@ -367,6 +376,19 @@ async function sendToOpenAI(apiKey, sessionMessages, maxTokens) {
             timeout: 120000
         }
     );
+}
+async function searchBrave(query) {
+    const res = await axios.get('https://api.search.brave.com/res/v1/web/search', {
+        headers: {
+            'Accept': 'application/json',
+            'X-Subscription-Token': process.env.BRAVE_API_KEY
+        },
+        params: {
+            q: query,
+            count: 3
+        }
+    });
+    return res.data.web.results.map(r => `${r.title}\n${r.url}\n${r.description}`).join('\n\n');
 }
 
 // API lấy lịch sử hội thoại

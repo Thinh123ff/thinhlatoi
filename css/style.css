@@ -46,17 +46,27 @@ body {
 }
 .logo{
     width: 100%;
+    opacity: 70%;
     text-align: center;
 }
-.logo a{
+.menu-content a{
     text-decoration: none;
-    font-family: Papyrus, serif;
-    color: #abb2bd;
-    font-weight: bold;
-    font-size: 35px;
+    font-family: 'Quicksand', sans-serif;
+    color: white;
+    font-size: 17px;
+    width: 100%;
+    padding: 15px;
+}
+.menu-content a:hover{
+    border-radius: 10px;
+    border:1px solid #6c5ce7;
 }
 .menu-content {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
     width: 100%;
+    box-shadow: var(--shadow);
     max-height: calc(100vh - 120px); /* Hoặc 80%, tùy bạn */
     overflow-y: auto;
     padding-right: 6px; /* tránh bị che nội dung khi có scrollbar */
@@ -117,11 +127,12 @@ body {
     left: -255px; /* Ẩn ban đầu */
     width: 255px;
     height: 100%;
-    background-color: #3f3f3f;
-    color: white;
+    background:linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("/image/olena-bohovyk-Cq5NaI0yKBE-unsplash.jpg") no-repeat center center;
+    background-size: cover;
+    color: black;
     padding: 10px;
     box-shadow: 2px 0 5px rgba(0,0,0,0.3);
-    transition: left 0.3s ease;
+    transition: left 0.4s ease;
     z-index: 1001;
     display: flex;
     flex-direction: column;
@@ -149,6 +160,99 @@ body {
 }
 .side-menu.open {
     left: 0;
+}
+.copyright{
+    width: 100%;
+    text-align: center;
+}
+.copyright p{
+    color: white;
+    font-size: 12px;
+    opacity: 80%;
+}
+#cookie-banner{
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    width:90%;
+    max-width:1100px;
+    background-color:rgba(255, 255, 255, 0.97);
+    color:#333;
+    padding:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:'Segoe UI', Roboto, sans-serif;
+    z-index:1000;
+    box-shadow:0 5px 30px rgba(0, 0, 0, 0.15);
+    border-radius:12px;
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(228, 228, 228, 0.8);
+    animation:slidein 0.5s ease-out;
+}
+@keyframes slidein {
+    from{
+        opacity:0;
+        transform:translate(-50%, 100px);
+    }
+    to{
+        opacity:1;
+        transform:translate(-50%, 0);
+    }
+}
+.cookie-content{
+    flex: 1;
+    padding: 10px;
+}
+.cookie-content h2{
+    margin-top:0;
+    margin-bottom:12px;
+    font-size:22px;
+    font-weight:600;
+    color:#222;
+}
+.cookie-content p{
+    margin:0;
+    font-size:15px;
+    line-height:1.6;
+    color:#555;
+}
+.cookie-buttons{
+    display:flex;
+    gap:15px;
+    flex-shrink:0;
+}
+.cookie-buttons button{
+    padding:12px 28px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:15px;
+    transition:all 0.3s ease;
+    box-shadow:0 2px 8px rgba(0, 0, 0, 0.1);
+    outline:none;
+    letter-spacing:0.5px;
+}
+#accept-cookies{
+    background-color:#4285F4;
+    color:white;
+}
+#accept-cookies:hover{
+    background-color:#2b6ed9;
+    transform:translateY(-2px);
+    box-shadow:0 4px 12px rgba(66, 133, 244, 0.3);
+}
+#reject-cookies{
+    background-color:transparent;
+    color:#555;
+    border:1.5px solid #d0d0d0;
+}
+#reject-cookies:hover{
+    background-color:#f2f2f2;
+    transform:translateY(-2px);
+    box-shadow:0 4px 12px rgba(0, 0, 0, 0.08);
 }
 /* Nền overlay */
 .menu-overlay {
@@ -184,14 +288,6 @@ body {
 }
 .theme-toggle:hover {
     background-color: var(--light-bg);
-}
-.copyright{
-    width: 100%;
-    text-align: center;
-}
-.copyright p{
-    font-size: 12px;
-    opacity: 30%;
 }
 /* Dark mode scrollbar */
 .dark-mode ::-webkit-scrollbar-thumb {
@@ -306,6 +402,11 @@ pre code.hljs {
     font-size: 16px;
     padding: 4px 0 4px 0;
 }
+.message-content a {
+    color: #1e90ff;
+    text-decoration: underline;
+    word-break: break-word;
+}
 .messages.grabbing {
     user-select: none; /* Chỉ tạm thời chặn select khi đang kéo */
 }
@@ -415,7 +516,6 @@ pre code.hljs {
     position: relative;
     background-color: var(--white);
     border-radius: 30px;
-    border: 1px solid rgba(0, 12, 255, 0.2);
     box-shadow: var(--shadow);
     padding: 0 8px 8px 8px;
     display: flex;
@@ -425,8 +525,16 @@ pre code.hljs {
     height: auto;
     max-height: 300px;
     overflow: hidden;
+    animation: rainbowBorder 15s linear infinite;
 }
-
+.input-container {
+    border: none;
+    transition: border 10s ease;
+}
+.input-container:focus-within {
+    border: 1px solid;
+    box-shadow: var(--shadow);
+}
 .input-area {
     display: flex;
     justify-content: space-between;
@@ -482,16 +590,34 @@ textarea {
     height: 36px;
     border-radius: 50%;
     cursor: pointer;
+}
+.tool-btn span{
+    font-size: 16px;
+    color: white;
+}
+#clearBtn{
     display: flex;
+    gap: 8px;
     align-items: center;
     justify-content: center;
-    color: #777;
+    width: 100%;
+    border-radius: 10px;
+}
+.new-chat{
+    display: flex;
+    justify-self: center;
+    background-color: #5649c0;
+    border-radius: 10px;
+    width: 50%;
+}
+#new-chat{
+    color: white;
 }
 .button-clear{
     display: flex;
 }
 .tool-btn:hover {
-    background-color: var(--light-bg);
+    background: none;
     color: var(--primary-color);
 }
 .typing-indicator {
@@ -810,6 +936,38 @@ textarea {
     .initial-state {
         top: 35vh;
     }
+    .mode-menu {
+        position: fixed;
+        top: -80px;
+        width: 31%;
+        left: 92px;
+        background: #1f2023;
+        border-radius: 15px;
+        border: 1px solid #3f3f3f;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        padding: 6px;
+    }
+    #cookie-banner{
+        flex-direction:column;
+        align-items:flex-start;
+        padding:20px;
+        bottom:10px;
+    }
+    .cookie-content{
+        padding-right:0;
+        padding-bottom:15px;
+    }
+    .cookie-buttons{
+        width:100%;
+    }
+    .cookie-buttons button{
+        flex:1;
+        text-align:center;
+        padding:12px 15px;
+    }
 }
 .copy-btn {
     position: absolute;
@@ -835,7 +993,7 @@ textarea {
 }
 .toast {
     background-color: black;
-    color: red;
+    color: coral;
     font-weight: bold;
     padding: 8px 10px;
     margin-bottom: 10px;
