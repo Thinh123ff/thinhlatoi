@@ -435,6 +435,7 @@ pre code.hljs {
     box-shadow: var(--shadow);
     padding: 0 8px 8px 8px;
     display: flex;
+    border: 1px solid;
     flex-direction: column;
     justify-self: center;
     width: 103%;
@@ -442,14 +443,6 @@ pre code.hljs {
     max-height: 300px;
     overflow: hidden;
     animation: rainbowBorder 15s linear infinite;
-}
-.input-container {
-    border: none;
-    transition: border 10s ease;
-}
-.input-container:focus-within {
-    border: 1px solid;
-    box-shadow: var(--shadow);
 }
 .input-area {
     display: flex;
