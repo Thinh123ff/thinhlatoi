@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome to the universe</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon-splash/favicon_io/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-splash/favicon_io/favicon-32x32.png">
+  <link rel="shortcut icon" href="favicon-splash/favicon_io/favicon.ico?v=1.0">
+  <link rel="stylesheet" href="css/splash.css">
+</head>
+<body>
+<bh-container>
+  <bh-doppler></bh-doppler>
+  <bh-photon-ring></bh-photon-ring>
+  <bh-accretion></bh-accretion>
+  <bh-backdrop></bh-backdrop>
+  <bh-shadow></bh-shadow>
+</bh-container>
+<audio src="https://deepspace.vercel.app/audio.mp3" loop></audio>
+<bh-audio onclick="playAudio()">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+  </svg>
+</bh-audio>
+<!-- Typewriter text container -->
+<div id="typewriterContainer" class="typewriter-container">
+  <div class="typewriter-text">
+    <span id="textContent"></span>
+    <span class="cursor" id="cursor"></span>
+  </div>
+</div>
+<button id="enterBtn" class="start-button">Bắt đầu</button>
+<script src="js/splash.js"></script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+html,
+body {
+    padding: 0;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    background-color: black;
+    opacity: 1;
+    transition: opacity 0.6s ease;
+}
+:root {
+    --photon: #00e8ff;
+    --accretion: #bc00f3;
+    --doppler: #5b3cf5;
+}
+bh-container {
+    display: grid;
+    place-items: center;
+    height: 100vh;
+    grid-template-areas: "bh-shadow";
+    background: linear-gradient(-45deg, black, #20184a, black);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    overflow: hidden;
+}
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+bh-doppler {
+    width: 40vw;
+    height: 40vw;
+    grid-area: bh-shadow;
+    border-radius: 63% 50% 55% 42% / 67% 47% 65% 47%;
+    animation: doppler 9s ease-in-out 0.5s infinite backwards;
+    z-index: 2;
+    background: linear-gradient(-45deg, var(--accretion), #20184a, #1c163b);
+    opacity: .3;
+}
+@keyframes doppler {
+    0%   {
+        transform: scale(1) rotate(0deg);
+        border-radius: 51% 50% 55% 52% / 51% 43% 68% 48%;
+    }
+    50% {
+        transform: scale(3.4) rotate(-160deg);
+        border-radius: 83% 60% 55% 22% / 67% 97% 65% 47%;
+    }
+    100%   {
+        transform: scale(1) rotate(0deg);
+        border-radius: 51% 50% 55% 52% / 51% 43% 68% 48%;
+    }
+}
+bh-photon-ring {
+    width: 35vw;
+    height: 35vw;
+    border-radius: 100%;
+    grid-area: bh-shadow;
+    background: var(--photon);
+    animation: photon 8s ease-in-out 0.5s infinite alternate;
+    z-index: 2;
+    box-shadow:inset 50px -10px 0px 4px black;
+    border: 60px double #5b3cf5;
+    box-sizing: content-box;
+    padding: 40px;
+    background-clip: padding-box;
+}
+@keyframes photon {
+    0%   {
+        transform: rotate(0deg);
+        border-radius: 51% 50% 155% 52% / 51% 13% 88% 48%;
+        opacity: .2;
+    }
+    50% {
+        transform: rotate(-160deg) ;
+        border-radius: 63% 50% 55% 42% / 67% 27% 65% 47%;
+        opacity: .4;
+        filter: blur(50px);
+    }
+    100%   {
+        transform: rotate(0deg);
+        border-radius: 51% 50% 55% 52% / 51% 43% 38% 48%;
+        opacity: .6;
+    }
+}
+bh-accretion {
+    width: 30vw;
+    height: 30vw;
+    background: var(--accretion);
+    grid-area: bh-shadow;
+    border-radius: 63% 50% 55% 42% / 67% 47% 65% 47%;
+    animation: accretion 8s ease-in-out 0.5s infinite alternate;
+    z-index: 3;
+}
+@keyframes accretion {
+    0%   {
+        transform: scale(1) rotate(0deg);
+        border-radius: 51% 50% 55% 52% / 51% 43% 68% 48%;
+    }
+    50% {
+        transform: scale(1.4) rotate(100deg) ;
+        border-radius: 63% 50% 55% 42% / 67% 47% 65% 47%;
+        opacity: 0.7;
+    }
+    100%   {
+        transform: scale(0.9) rotate(0deg);
+        border-radius: 51% 50% 55% 52% / 51% 43% 68% 48%;
+    }
+}
+bh-backdrop {
+    width: 100vw;
+    height: 100%;
+    grid-area: bh-shadow;
+    backdrop-filter: blur(50px);
+    z-index: 4;
+}
+bh-shadow {
+    width: 20vw;
+    height: 20vw;
+    background: black;
+    display: flex;
+    border-radius: 100%;
+    grid-area: bh-shadow;
+    animation: shadow 2s ease-in-out 0.5s infinite alternate;
+    z-index: 5;
+    box-shadow: 2px 3px 10px 1px white, -20px 65px 160px 10px rgba(255, 255, 255, 0.7),  -2px -3px 0px 1px rgba(255, 255, 255, 0.2), -4px 14px 30px 3px rgba(255, 255, 255, 0.5);
+}
+@keyframes shadow {
+    0% { transform: rotate(10deg)}
+    20% { transform: rotate(30deg)}
+    40% { transform: rotate(20deg)}
+    50% { transform: rotate(50deg)}
+    70% { transform: rotate(90deg)}
+    100% { transform: rotate(180deg)}
+}
+bh-audio {
+    position: fixed;
+    right: 40px;
+    bottom: 40px;
+    z-index: 10;
+    color: white;
+    cursor: pointer;
+}
+bh-container {
+    animation-fill-mode: both;
+    transition-timing-function: ease-out;
+    animation-name: init;
+    animation-duration: 4s;
+    animation-iteration-count: 1;
+}
+@keyframes init {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+/* Typewriter text styles */
+.typewriter-container {
+    position: absolute;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 15;
+    opacity: 1;
+    transition: opacity 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+    will-change: opacity;
+}
+.typewriter-container.fade-out {
+    opacity: 0;
+}
+.typewriter-text {
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: #00e8ff;
+    letter-spacing: 0.5px;
+    max-width: 500px;
+    line-height: 1.6;
+}
+.cursor {
+    display: inline-block;
+    background-color: #00e8ff;
+    width: 2px;
+    height: 1.2em;
+    animation: smoothBlink 1.2s ease-in-out infinite;
+    transition: opacity 0.3s ease;
+}
+@keyframes smoothBlink {
+    0%, 45% { opacity: 1; }
+    50%, 95% { opacity: 0.1; }
+    100% { opacity: 1; }
+}
+.start-button {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #00e8ff;
+    background: linear-gradient(to left, #00e8ff 100%, transparent 100%);
+    background-repeat: no-repeat;
+    background-size: 0% 100%;
+    border: 1px solid #00e8ff;
+    border-radius: 999px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease, background-size 0.4s ease;
+    z-index: 20;
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+}
+.start-button.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+.start-button:hover {
+    background-size: 100% 100%;
+    color: #000000;
+}

@@ -124,14 +124,14 @@ Ví dụ:
 
 📌 Tránh trả lời hời hợt hoặc “không biết”. Nếu chưa chắc, hãy hỏi lại để làm rõ.
 
-🌐 Nếu câu hỏi liên quan đến: link, website, địa chỉ trang web, tên miền... hãy **hiển thị rõ các đường link hữu ích từ kết quả tìm kiếm web (Brave)**. Nếu có nhiều kết quả, hãy:
+🌐 Nếu câu hỏi liên quan đến: link, tìm kiếm, website, địa chỉ trang web, tên miền... hãy **hiển thị rõ các đường link hữu ích từ kết quả tìm kiếm web (Brave)**. Nếu có nhiều kết quả, hãy:
 - Hiển thị tiêu đề, link và mô tả.
 - Trình bày bằng danh sách hoặc bảng markdown nếu phù hợp.
 - Không cần che giấu hay bỏ qua các link web an toàn từ kết quả tìm kiếm.
 
 🧠 Phạm vi hỗ trợ:
 - Lập trình, kỹ thuật, tài liệu, học tập, nấu ăn, sức khỏe cơ bản, kỹ năng mềm, kinh doanh nhỏ.
-- Tìm kiếm thông tin nâng cao nếu có công cụ hỗ trợ.
+- Tìm kiếm thông tin nâng cao bằng công cụ hỗ trợ.
 
 - **Không trả lời qua loa, hời hợt** với những câu hỏi chưa hiểu rõ hoặc thông tin chưa đầy đủ.
 - **Nếu chưa chắc chắn hoặc thông tin mơ hồ**:
@@ -261,8 +261,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
 
                     content.push({ type: 'text', text: `🎵 ${filename}:\n\n${whisperRes.data.text}` });
                 } else {
-                    const textContent = buffer.toString('utf8').slice(0, 5000);
-                    content.push({ type: 'text', text: `📎 ${filename}:\n\n${textContent}` });
+                    content.push({ type: 'text', text: `📎 ${filename}` });
                 }
             } catch (err) {
                 content.push({ type: 'text', text: `⚠️ Không thể xử lý file ${filename}` });

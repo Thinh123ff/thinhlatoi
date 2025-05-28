@@ -2,7 +2,7 @@
     --primary-color: #6c5ce7;
     --secondary-color: #a29bfe;
     --text-color: #444;
-    --light-bg: #f5f7fb;
+    --light-bg: #F5F5F8;
     --white: #ffffff;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     --radius: 12px;
@@ -66,7 +66,6 @@ body {
     flex-direction: column;
     text-align: center;
     width: 100%;
-    box-shadow: var(--shadow);
     max-height: calc(100vh - 120px); /* Hoặc 80%, tùy bạn */
     overflow-y: auto;
     padding-right: 6px; /* tránh bị che nội dung khi có scrollbar */
@@ -124,12 +123,11 @@ body {
 .side-menu {
     position: fixed;
     top: 0;
-    left: -255px; /* Ẩn ban đầu */
-    width: 255px;
+    left: -50vh; /* Ẩn ban đầu */
+    width: 50vh;
     height: 100%;
-    background:linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("../image/olena-bohovyk-Cq5NaI0yKBE-unsplash.jpg") no-repeat center center;
-    background-size: cover;
-    color: black;
+    background-color: #191621;
+    color: white;
     padding: 10px;
     box-shadow: 2px 0 5px rgba(0,0,0,0.3);
     transition: left 0.4s ease;
@@ -223,6 +221,13 @@ body {
     position: relative;
     margin-bottom: 150px;
     top: 0;
+}
+/* Message styles */
+.message {
+    display: flex;
+    gap: 16px;
+    max-width: 100%;
+    animation: fadeIn 0.3s ease-in-out;
 }
 .messages {
     flex: 1;
@@ -333,6 +338,112 @@ pre code.hljs {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
+.message-content.user-content {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-start;
+}
+.file-item img,
+.message-content img {
+    border-radius: 8px;
+    object-fit: cover;
+    max-width: 240px;
+    max-height: 240px;
+    margin: 8px 0;
+    cursor: zoom-in;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+}
+
+.file-item img:hover,
+.message-content img:hover {
+    transform: scale(1.05);
+}
+.image-preview-container {
+    position: relative;
+    display: inline-block;
+    margin: 6px;
+}
+
+.preview-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    cursor: zoom-in;
+    transition: transform 0.2s ease;
+}
+.preview-image:hover {
+    transform: scale(1.05);
+}
+.remove-image-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    color: red;
+    padding: 2px 6px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+}
+.file-item {
+    display: inline-block;
+    position: relative;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-width: 120px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.file-icon-container {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.file-name {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+.remove-image-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+}
+.text-preview {
+    background: #f5f5f5;
+    padding: 6px;
+    font-size: 11px;
+    border-radius: 6px;
+    max-width: 200px;
+    max-height: 100px;
+    overflow: auto;
+    white-space: pre-wrap;
+    margin-top: 4px;
+}
+.file-preview-block {
+    background: #3b3e45;
+    padding: 8px;
+    border-left: 4px solid #3f51b5;
+    border-radius: 6px;
+    margin: 4px 0;
+    font-size: 13px;
+    max-width: 280px;
+    white-space: pre-wrap;
+}
 /* Initial state styles */
 .initial-state {
     position: absolute;
@@ -386,13 +497,6 @@ pre code.hljs {
     transform: translate(-50%, -50%);
     width: calc(100%);
 }
-/* Message styles */
-.message {
-    display: flex;
-    gap: 16px;
-    max-width: 100%;
-    animation: fadeIn 0.3s ease-in-out;
-}
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -423,7 +527,6 @@ pre code.hljs {
     height: 42px;
 }
 .user-content {
-    background-color: #ffffffd9;
     color: #110e0e;
     border-radius: 25px;
     padding: 15px;
@@ -435,6 +538,7 @@ pre code.hljs {
     box-shadow: var(--shadow);
     padding: 0 8px 8px 8px;
     display: flex;
+    border: 1px solid #3E3760;
     flex-direction: column;
     justify-self: center;
     width: 103%;
@@ -442,14 +546,6 @@ pre code.hljs {
     max-height: 300px;
     overflow: hidden;
     animation: rainbowBorder 15s linear infinite;
-}
-.input-container {
-    border: none;
-    transition: border 10s ease;
-}
-.input-container:focus-within {
-    border: 1px solid;
-    box-shadow: var(--shadow);
 }
 .input-area {
     display: flex;
@@ -524,7 +620,7 @@ textarea {
     justify-self: center;
     background-color: #5649c0;
     border-radius: 10px;
-    width: 50%;
+    width: 125px;
 }
 #new-chat{
     color: white;
@@ -533,7 +629,6 @@ textarea {
     display: flex;
 }
 .tool-btn:hover {
-    background: none;
     color: var(--primary-color);
 }
 .typing-indicator {
@@ -557,85 +652,9 @@ textarea {
 .typing-indicator span:nth-child(3) {
     animation-delay: 0.4s;
 }
-/* CSS cho phần upload file */
-.file-display {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px; /* 👈 Thêm dòng này nếu muốn file cách phần trên */
-}
-.file-item {
-    display: flex;
-    align-items: center;
-    background-color: #f0f0f0;
-    border-radius: 8px;
-    left: 10px;
-    padding: 5px 5px;
-    margin-bottom: 5px;
-    font-size: 0.85rem;
-    max-width: 100%;
-    position: relative;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.dark-mode .file-item {
-    background-color: #2d3748;
-    color: #f0f0f0;
-}
-.file-item .file-name {
-    max-width: calc(100% - 30px);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.file-item .file-icon {
-    margin-right: 5px;
-    width: 16px;
-    height: 16px;
-}
-
-.file-item .remove-file {
-    margin-left: 8px;
-    cursor: pointer;
-    color: #666;
-    font-size: 18px;
-    line-height: 0;
-    padding: 2px;
-}
-
-.dark-mode .file-item .remove-file {
-    color: #ccc;
-}
-
-.file-item .remove-file:hover {
-    color: #ff4d4f;
-}
-
-.file-thumbnail {
-    width: 24px;
-    height: 24px;
-    object-fit: cover;
-    margin-right: 8px;
-    border-radius: 4px;
-}
-
-/* File type icons */
-.file-icon-container {
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 8px;
-    background-color: #e6e6e6;
-    border-radius: 4px;
-}
 .send-btn[disabled] {
     cursor: not-allowed;
 }
-
 .send-btn[data-state="stop"] {
     cursor: pointer !important;
 }
@@ -715,7 +734,31 @@ textarea {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.image-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
 
+.image-overlay img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    animation: zoomIn 0.25s ease;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
 /* Image preview in messages */
 .message .image-preview {
     max-width: 300px;
@@ -770,7 +813,6 @@ textarea {
         cursor: pointer;
         z-index: 2;
     }
-
     .message-content pre {
         font-size: 13px;
         background-color: #232323;
@@ -784,12 +826,10 @@ textarea {
         line-height: 1.5;
         padding: 10px;
     }
-
     .message-content pre code {
         min-width: 600px;
         display: inline-block;
     }
-
     .message-content table {
         overflow-x: auto;
         max-width: 96vw;
@@ -800,7 +840,6 @@ textarea {
         display: inline-block;
         font-size: 14px;
     }
-
     .message-content th,
     .message-content td {
         font-size: 13px;
@@ -808,14 +847,12 @@ textarea {
         min-width: 100px;
         word-break: break-word;
     }
-
     .chat-container:not(.has-messages) .input-wrapper {
         top: 87vh;
         bottom: auto;
         width: 100%;
         transform: translate(-50%, -50%);
     }
-
     .header {
         position: fixed;
         width: 100%;
@@ -823,32 +860,31 @@ textarea {
         background-color: white;
         z-index: 10;
     }
-
     .logo {
         position: relative;
         font-size: 20px;
         font-weight: bold;
         color: var(--primary-color);
     }
-
+    .side-menu{
+        left: -30vh;
+        width: 30vh;
+    }
     .theme-toggle {
         position: absolute;
     }
-
     .messages {
         width: 100%;
         padding-left: 5px;
         padding-right: 5px;
         overflow-x: hidden;
     }
-
     .message-content p,
     .message-content div,
     .message-content span {
         word-break: break-word;
         white-space: normal;
     }
-
     .initial-state {
         top: 35vh;
     }
@@ -911,13 +947,13 @@ textarea {
 }
 /* Dark mode */
 .dark-mode {
-    --light-bg: #1f2023;
-    --white: #27292f;
+    --light-bg: #1F1B29;
+    --white: #2A253A;
     --text-color: #e6e6e6;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 .dark-mode .header {
-    background-color: #1f2023;
+    background-color: #1F1B29;
 }
 .dark-mode .logo {
     color: var(--secondary-color);
@@ -939,9 +975,6 @@ textarea {
 }
 .dark-mode .user-content {
     color: white;
-}
-.dark-mode .user-content {
-    background: #323232d9;
 }
 .dark-mode textarea {
     color: var(--text-color);

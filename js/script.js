@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('fileInput').addEventListener('change', function (e) {
         const newFiles = Array.from(e.target.files);
 
-        if ((selectedFiles.length + newFiles.length) > 4) {
+        if ((selectedFiles.length + newFiles.length) > 5) {
             alert('❌ Bạn chỉ được chọn tối đa 4 file.');
             e.target.value = ''; // Reset input file
             return;
@@ -58,48 +58,6 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedFiles = selectedFiles.concat(newFiles);
 
         updateFileDisplay();
-
-        if (selectedFiles.length > 0) {
-            let fileDisplay = document.getElementById('fileDisplay');
-            if (!fileDisplay) {
-                fileDisplay = document.createElement('div');
-                fileDisplay.id = 'fileDisplay';
-                fileDisplay.className = 'file-display';
-                const inputContainer = document.querySelector('.input-container');
-                inputContainer.insertBefore(fileDisplay, inputContainer.firstChild);
-            }
-
-            fileDisplay.innerHTML = ''; // Xóa cũ
-
-            selectedFiles.forEach((file, index) => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-
-                const icon = document.createElement('div');
-                icon.className = 'file-icon-container';
-                icon.textContent = getFileIcon(file.name);
-
-                const fileName = document.createElement('span');
-                fileName.className = 'file-name';
-                fileName.textContent = file.name;
-
-                const removeBtn = document.createElement('span');
-                removeBtn.className = 'remove-file';
-                removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x-icon lucide-circle-x"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>';
-                removeBtn.title = 'Xoá file';
-
-                // Sự kiện xoá file
-                removeBtn.addEventListener('click', () => {
-                    selectedFiles.splice(index, 1); // Xoá file khỏi mảng
-                    updateFileDisplay();            // Cập nhật lại giao diện
-                });
-
-                fileItem.appendChild(icon);
-                fileItem.appendChild(fileName);
-                fileItem.appendChild(removeBtn);
-                fileDisplay.appendChild(fileItem);
-            });
-        }
     });
 
     function updateFileDisplay() {
@@ -118,44 +76,52 @@ document.addEventListener('DOMContentLoaded', function() {
         fileDisplay.innerHTML = '';
 
         selectedFiles.forEach((file, index) => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-
-            const icon = document.createElement('div');
-            icon.className = 'file-icon-container';
+            const container = document.createElement('div');
+            container.className = 'file-item';
 
             if (file.type.startsWith('image/')) {
                 const img = document.createElement('img');
                 img.src = URL.createObjectURL(file);
-                img.style.width = '40px';
-                img.style.height = '40px';
-                img.style.objectFit = 'cover';
-                img.style.borderRadius = '4px';
-                icon.appendChild(img);
+                img.className = 'preview-image';
+                enableImageZoom(img);
+                container.appendChild(img);
             } else {
+                const icon = document.createElement('div');
+                icon.className = 'file-icon-container';
                 icon.textContent = getFileIcon(file.name);
+
+                const fileName = document.createElement('span');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+
+                container.appendChild(icon);
+                container.appendChild(fileName);
+            }
+            if (file.type.startsWith('text/') || ['application/json', 'application/xml'].includes(file.type)) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const text = document.createElement('pre');
+                    text.textContent = reader.result.slice(0, 300) + '...';
+                    text.className = 'text-preview';
+                    container.appendChild(text);
+                };
+                reader.readAsText(file);
             }
 
-            const fileName = document.createElement('span');
-            fileName.className = 'file-name';
-            fileName.textContent = file.name;
-
             const removeBtn = document.createElement('span');
-            removeBtn.className = 'remove-file';
-            removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x-icon lucide-circle-x"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>';
+            removeBtn.className = 'remove-image-btn';
+            removeBtn.innerHTML = '✖';
             removeBtn.title = 'Xoá file';
             removeBtn.addEventListener('click', () => {
-                selectedFiles.splice(index, 1);
+                const fileToRemove = selectedFiles[index];
+                selectedFiles = selectedFiles.filter(f => f !== fileToRemove);
                 updateFileDisplay();
             });
 
-            fileItem.appendChild(icon);
-            fileItem.appendChild(fileName);
-            fileItem.appendChild(removeBtn);
-            fileDisplay.appendChild(fileItem);
+            container.appendChild(removeBtn);
+            fileDisplay.appendChild(container);
         });
 
-        // Nếu hết file thì xoá luôn khung hiển thị
         if (selectedFiles.length === 0 && fileDisplay) {
             fileDisplay.remove();
         }
@@ -164,7 +130,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function getFileIcon(filename) {
         const ext = filename.split('.').pop().toLowerCase();
 
-        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) return '🖼️';
         if (['pdf'].includes(ext)) return '📄';
         if (['doc', 'docx'].includes(ext)) return '📃';
         if (['xls', 'xlsx', 'csv'].includes(ext)) return '📊';
@@ -282,17 +247,65 @@ function loadConversationHistory() {
                 // Hiển thị lịch sử tin nhắn
                 data.history.forEach(msg => {
                     if (msg.role === 'user') {
-                        // Lấy nội dung tin nhắn người dùng
-                        let userContent = '';
-                        if (typeof msg.content === 'string') {
-                            userContent = msg.content;
-                        } else if (Array.isArray(msg.content)) {
-                            // Lấy phần text từ content nếu là mảng
-                            const textItem = msg.content.find(item => item.type === 'text');
-                            if (textItem) userContent = textItem.text;
+                        if (Array.isArray(msg.content)) {
+                            let messageGroup = document.createElement('div');
+                            messageGroup.className = 'message user-message';
+                            let contentDiv = document.createElement('div');
+                            contentDiv.className = 'message-content user-content';
+
+                            msg.content.forEach(item => {
+                                if (item.type === 'image_url' && item.image_url?.url) {
+                                    const img = document.createElement('img');
+                                    img.src = item.image_url.url;
+                                    img.style.maxWidth = '200px';
+                                    img.style.maxHeight = '200px';
+                                    img.style.objectFit = 'cover';
+                                    img.style.marginBottom = '8px';
+                                    img.style.borderRadius = '6px';
+                                    enableImageZoom(img);
+                                    contentDiv.appendChild(img);
+                                } else if (item.type === 'text') {
+                                    const content = item.text;
+
+                                    // Nếu là file dạng 📄, 📎, 📊 thì chỉ hiện icon + tên
+                                    if (/^📄|^📎|^📊/.test(content)) {
+                                        const match = content.match(/^([📄📎📊]) (.+)$/);
+                                        if (match) {
+                                            const icon = match[1];
+                                            const filename = match[2];
+
+                                            const fileEl = document.createElement('div');
+                                            fileEl.className = 'file-item';
+
+                                            const iconDiv = document.createElement('div');
+                                            iconDiv.className = 'file-icon-container';
+                                            iconDiv.textContent = icon;
+
+                                            const nameDiv = document.createElement('div');
+                                            nameDiv.className = 'file-name';
+                                            nameDiv.textContent = filename;
+
+                                            fileEl.appendChild(iconDiv);
+                                            fileEl.appendChild(nameDiv);
+                                            contentDiv.appendChild(fileEl);
+                                            return; // 👉 Đảm bảo không rơi xuống đoạn dưới
+                                        }
+                                    }
+
+                                    // Nếu không phải file dạng đặc biệt, hiển thị nội dung bình thường
+                                    const textEl = document.createElement('div');
+                                    textEl.textContent = content;
+                                    textEl.style.marginTop = '4px';
+                                    contentDiv.appendChild(textEl);
+                                }
+                            });
+
+                            messageGroup.appendChild(contentDiv);
+                            messagesContainer.appendChild(messageGroup);
+                        } else if (typeof msg.content === 'string') {
+                            addMessage(msg.content, 'user');
                         }
-                        addMessage(userContent, 'user');
-                    } else if (msg.role === 'assistant') {
+                    }else if (msg.role === 'assistant') {
                         addMessage(msg.content, 'ai');
                     }
                 });
@@ -309,7 +322,7 @@ function sendMessage() {
     const message = userInput.value.trim();
     if (message === '') return;
 
-    addMessage(message, 'user');
+    addMessage({ text: message, files: selectedFiles }, 'user');
     scrollToBottom(true);
     userInput.value = '';
     userInput.style.height = 'auto';
@@ -420,32 +433,77 @@ fetch('https://chat-bot-server-foxw.onrender.com/ask', {
     });
 }
 
-function addMessage(content, sender) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message');
+    function addMessage(content, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
 
-    if (sender === 'user') {
-        messageDiv.classList.add('user-message');
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content user-content';
-        contentDiv.textContent = content;
-        messageDiv.appendChild(contentDiv);
-    } else if (sender === 'ai') {
-        messageDiv.classList.add('ai-message');
+        if (sender === 'user') {
+            messageDiv.classList.add('user-message');
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content user-content';
 
-        const cardDiv = document.createElement('div');
-        cardDiv.className = 'ai-card';
+            // Nếu là text thì hiển thị
+            if (typeof content === 'string') {
+                const text = document.createElement('div');
+                text.textContent = content;
+                contentDiv.appendChild(text);
+            } else if (typeof content === 'object' && content.text) {
+                const text = document.createElement('div');
+                text.textContent = content.text;
+                contentDiv.appendChild(text);
 
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
-        contentDiv.appendChild(formatMessage(content));
+                // 👇 Hiển thị file kèm
+                content.files?.forEach((file) => {
+                    // Bỏ qua ảnh — vì ảnh sẽ hiển thị riêng bên dưới
+                    if (file.type.startsWith('image/')) return;
 
-        cardDiv.appendChild(contentDiv);
-        messageDiv.appendChild(cardDiv);
+                    const container = document.createElement('div');
+                    container.className = 'file-item';
+
+                    const icon = document.createElement('div');
+                    icon.className = 'file-icon-container';
+                    icon.textContent = getFileIcon(file.name);
+
+                    const name = document.createElement('div');
+                    name.className = 'file-name';
+                    name.textContent = file.name;
+
+                    container.appendChild(icon);
+                    container.appendChild(name);
+                    contentDiv.appendChild(container);
+                });
+            }
+
+            // 👇 Thêm phần hiển thị ảnh đã gửi
+            selectedFiles.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.style.maxWidth = '200px';
+                    img.style.maxHeight = '200px';
+                    img.style.objectFit = 'cover';
+                    img.style.marginBottom = '8px';
+                    img.style.borderRadius = '6px';
+                    enableImageZoom(img);
+                    contentDiv.appendChild(img);
+                }
+            });
+
+            messageDiv.appendChild(contentDiv);
+        } else if (sender === 'ai') {
+            messageDiv.classList.add('ai-message');
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'ai-card';
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.appendChild(formatMessage(content));
+            cardDiv.appendChild(contentDiv);
+            messageDiv.appendChild(cardDiv);
+        }
+
+        messagesContainer.appendChild(messageDiv);
+        updateLayout();
     }
-    messagesContainer.appendChild(messageDiv);
-    updateLayout();
-}
 
 function formatMessage(text) {
     // Thêm xử lý nếu text là undefined hoặc null
@@ -608,4 +666,28 @@ function showToast(message, duration = 6000) {
     setTimeout(() => {
         toast.remove();
     }, duration);
+}
+function enableImageZoom(imgElement) {
+    imgElement.style.cursor = 'zoom-in';
+    imgElement.addEventListener('click', () => {
+        const overlay = document.createElement('div');
+        overlay.className = 'image-overlay';
+
+        const zoomedImg = document.createElement('img');
+        zoomedImg.src = imgElement.src;
+
+        overlay.appendChild(zoomedImg);
+        document.body.appendChild(overlay);
+
+        // Đóng overlay khi click ngoài ảnh
+        overlay.addEventListener('click', () => {
+            overlay.remove();
+        });
+    });
+}
+const lastVisit = localStorage.getItem("lastVisit");
+const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+if (lastVisit !== today) {
+    window.location.href = "splash.html";
 }

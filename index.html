@@ -3,11 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
-  <link rel="stylesheet" href="css/style.css?v=1.2.3">
-=======
-  <link rel="stylesheet" href="css/style.css?v=1.2.1">
->>>>>>> 96f2266d5e2f7e63914b0278fc79640bf2738bad
+  <link rel="stylesheet" href="css/style.css?v=1.2.7">
   <title>Askiva</title>
 
   <meta name="description" content="Công cụ AI trả lời tự động bằng tiếng Việt – hỗ trợ hỏi đáp, học tập, công nghệ, lập trình, kỹ năng và hơn thế nữa." />
@@ -19,7 +15,7 @@
   <meta property="og:description" content="Hệ thống trả lời thông minh bằng tiếng Việt. Hỏi bất cứ điều gì – từ học tập, lập trình đến cuộc sống hàng ngày." />
   <meta property="og:url" content="https://thinhnt-mr.github.io/Chat-Bot/" />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://thinhnt-mr.github.io/Chat-Bot/image/baner.svg" />
+  <meta property="og:image" content="../image/baner.svg" />
 
   <link rel="apple-touch-icon" sizes="180x180" href="favicon/favicon_io/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon_io/favicon-32x32.png">
@@ -36,7 +32,7 @@
 <div id="website-content">
   <div class="header">
     <div id="menuOverlay" class="menu-overlay"></div>
-    <div class="menu-icon">
+    <div class="menu-icon" title="Mở menu">
       <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 6h16M4 12h16M4 18h16"/>
@@ -44,7 +40,7 @@
     </div>
     <nav id="sideMenu" class="side-menu">
       <div class="logo">
-        <img src="image/cu-meo.svg" width="70" height="70"><br><br>
+        <img src="image/cu-meo.svg" width="65" height="65"><br><br>
         <div class="new-chat">
           <button class="tool-btn" id="clearBtn" title="Cuộc trò chuyện mới">
             <!-- icon xóa -->
@@ -58,11 +54,11 @@
         <a href="cookie.html">Cookies</a>
       </div>
       <div class="copyright">
-        <p id="menu-copyright">© 2025 Askiva. 1.2.3</p>
+        <p id="menu-copyright">© 2025 Askiva. 1.2.7</p>
       </div>
     </nav>
     <div>
-      <button class="theme-toggle" id="themeToggle">
+      <button class="theme-toggle" id="themeToggle" title="Đổi màu chủ đề">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="5"></circle>
           <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -112,11 +108,22 @@
             </button>
             <button class="tool-btn" id="uploadFileBtn" title="Tải tệp đính kèm">
               <!-- icon file -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paperclip-icon lucide-paperclip"><path d="M13.234 20.252 21 12.3"/><path d="m16 6-8.414 8.586a2 2 0 0 0 0 2.828 2 2 0 0 0 2.828 0l8.414-8.586a4 4 0 0 0 0-5.656 4 4 0 0 0-5.656 0l-8.415 8.585a6 6 0 1 0 8.486 8.486"/></svg>
+              <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                        d="M14 0C16.7614 0 19 2.23858 19 5V17C19 20.866 15.866 24 12 24C8.13401 24 5 20.866 5 17V9H7V17C7 19.7614 9.23858 22 12 22C14.7614 22 17 19.7614 17 17V5C17 3.34315 15.6569 2 14 2C12.3431 2 11 3.34315 11 5V17C11 17.5523 11.4477 18 12 18C12.5523 18 13 17.5523 13 17V6H15V17C15 18.6569 13.6569 20 12 20C10.3431 20 9 18.6569 9 17V5C9 2.23858 11.2386 0 14 0Z"
+                        fill="currentColor"
+                />
+              </svg>
             </button>
           </div>
           <div>
-            <button id="sendBtn" class="send-btn" data-state="send" disabled>
+            <button id="sendBtn" class="send-btn" data-state="send" title="Gửi câu hỏi" disabled>
               <!-- icon gửi -->
               <svg id="sendIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -129,7 +136,7 @@
     </div>
   </div>
 </div>
-<script src="js/script.js?v=2.4"></script>
+<script src="js/script.js?v=2.6"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
   function hasVerifiedToday() {
@@ -156,14 +163,12 @@
       document.getElementById("website-content").style.display = "block";
     }
   }
-</script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script>
   marked.setOptions({
     breaks: true,
     gfm: true
   });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </body>
 </html>
