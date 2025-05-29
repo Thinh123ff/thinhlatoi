@@ -1,7 +1,7 @@
 :root {
     --primary-color: #6c5ce7;
     --secondary-color: #a29bfe;
-    --text-color: #444;
+    --text-color: black;
     --light-bg: #F5F5F8;
     --white: #ffffff;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -163,10 +163,62 @@ body {
     width: 100%;
     text-align: center;
 }
-.copyright p{
-    color: white;
-    font-size: 12px;
-    opacity: 80%;
+.login-btn {
+    padding: 8px 18px;
+    background-color: #4F46E5;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    background-color: #4338CA;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    object-fit: cover;
+    border: 2px solid #4F46E5;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    top: 48px;
+    right: 0;
+    background: #1E1E2F;
+    border-radius: 8px;
+    padding: 10px;
+    min-width: 200px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+.dropdown p {
+    color: #ddd;
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+.logout-btn {
+    background: #E11D48;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.logout-btn:hover {
+    background: #BE123C;
 }
 /* Nền overlay */
 .menu-overlay {
@@ -269,7 +321,6 @@ body {
 }
 pre code.hljs {
     background: #232323;
-    padding: 1em
 }
 .message-content code {
     font-family: Consolas, monospace;
@@ -311,8 +362,8 @@ pre code.hljs {
     word-break: break-word;
     overflow-wrap: break-word;
     box-sizing: border-box;
+    margin-top: 10px;
     line-height: 1.5;
-    padding: 1em;
     white-space: pre;
 }
 .message-content ul {

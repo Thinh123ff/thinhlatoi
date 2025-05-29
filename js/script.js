@@ -230,7 +230,7 @@ function updateLayout() {
 
 // Tải lịch sử hội thoại từ server
 function loadConversationHistory() {
-    fetch(`https://chat-bot-server-foxw.onrender.com/conversation/${currentSessionId}`)
+    fetch(`http://localhost:5000/conversation/${currentSessionId}`)
         .then(res => {
             if (!res.ok) {
                 // Nếu không tìm thấy phiên (mã lỗi 404), tạo phiên mới
@@ -362,7 +362,7 @@ function sendMessage() {
 
     let fullText = '';
 
-fetch('https://chat-bot-server-foxw.onrender.com/ask', {
+fetch('http://localhost:5000/ask', {
     method: 'POST',
     body: formData,
     signal: signal
@@ -690,4 +690,71 @@ const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
 if (lastVisit !== today) {
     window.location.href = "splash.html";
+}
+
+const CLIENT_ID = '128574841295-82rfv61vbk43hsjd3ku1ute0uda8rfie.apps.googleusercontent.com';
+
+function parseJwt(token) {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+}
+
+function handleCredentialResponse(response) {
+    const user = parseJwt(response.credential);
+    localStorage.setItem("user", JSON.stringify(user));
+    showUser(user);
+    showToast(`Chào mừng ${user.email}!`);
+}
+
+function showUser(user) {
+    document.getElementById("login-container").style.display = "none";
+    document.getElementById("user-area").style.display = "flex";
+    document.getElementById("avatar").src = user.picture;
+    document.getElementById("email").textContent = user.email;
+    document.getElementById("dropdown").style.display = "none";
+}
+
+function logout() {
+    localStorage.removeItem('user');
+    location.reload();
+}
+
+function initializeGoogleLogin() {
+    google.accounts.id.initialize({
+        client_id: CLIENT_ID,
+        callback: handleCredentialResponse,
+    });
+
+    // Khi bấm nút login thì hiện prompt chọn tài khoản
+    document.getElementById("custom-login-btn").addEventListener("click", () => {
+        google.accounts.id.prompt();
+    });
+
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+        showUser(JSON.parse(storedUser));
+    }
+
+    document.getElementById("avatar").addEventListener("click", (e) => {
+        e.stopPropagation();
+        const dropdown = document.getElementById("dropdown");
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    });
+
+    document.addEventListener("click", () => {
+        document.getElementById("dropdown").style.display = "none";
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+        const dropdown = document.getElementById("dropdown");
+        dropdown.innerHTML = `<p style="color: #ccc; margin: 0;">Đang đăng xuất...</p>`;
+        setTimeout(() => {
+            localStorage.removeItem("user");
+            location.reload();
+        }, 1300);
+    });
 }
