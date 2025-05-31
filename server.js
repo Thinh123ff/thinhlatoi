@@ -39,7 +39,8 @@ app.use(express.static('public'));
 app.use(session({
     store: new pgSession({
         pool: pgPool,
-        tableName: 'user_sessions'
+        tableName: 'user_sessions',
+        createTableIfMissing: true
     }),
     secret: process.env.SESSION_SECRET,
     resave: false,
