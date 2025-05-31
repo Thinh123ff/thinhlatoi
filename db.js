@@ -1,59 +1,46 @@
-const { Pool } = require('pg');
-const crypto = require('crypto');
+const Database = require('better-sqlite3');
+const db = new Database('chat.db');
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+db.exec(`
+    CREATE TABLE IF NOT EXISTS conversations (
+                                                 id TEXT PRIMARY KEY,
+                                                 email TEXT,
+                                                 createdAt TEXT,
+                                                 customName TEXT
+    );
+    CREATE TABLE IF NOT EXISTS messages (
+                                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                            sessionId TEXT,
+                                            role TEXT,
+                                            content TEXT,
+                                            createdAt TEXT,
+                                            FOREIGN KEY (sessionId) REFERENCES conversations(id)
+    );
+    CREATE TABLE IF NOT EXISTS shared_conversations (
+                                                        shareId TEXT PRIMARY KEY,
+                                                        sessionId TEXT,
+                                                        createdAt TEXT
+    );
+`);
 
-async function initTables() {
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS conversations (
-                                                     id TEXT PRIMARY KEY,
-                                                     email TEXT,
-                                                     createdAt TIMESTAMPTZ,
-                                                     customName TEXT
-        );
-
-        CREATE TABLE IF NOT EXISTS messages (
-                                                id SERIAL PRIMARY KEY,
-                                                sessionId TEXT REFERENCES conversations(id) ON DELETE CASCADE,
-            role TEXT,
-            content TEXT,
-            createdAt TIMESTAMPTZ
-            );
-
-        CREATE TABLE IF NOT EXISTS shared_conversations (
-                                                            shareId TEXT PRIMARY KEY,
-                                                            sessionId TEXT REFERENCES conversations(id) ON DELETE CASCADE,
-            createdAt TIMESTAMPTZ
-            );
-    `);
-}
-initTables();
-
-async function createShare(sessionId) {
-    const shareId = crypto.randomUUID();
-    await pool.query(
-        'INSERT INTO shared_conversations (shareId, sessionId, createdAt) VALUES ($1, $2, NOW())',
-        [shareId, sessionId]
+function createShare(sessionId) {
+    const shareId = require('crypto').randomUUID();
+    db.prepare('INSERT INTO shared_conversations (shareId, sessionId, createdAt) VALUES (?, ?, ?)').run(
+        shareId, sessionId, new Date().toISOString()
     );
     return shareId;
 }
 
-async function getSharedConversation(shareId) {
-    const result = await pool.query('SELECT sessionId FROM shared_conversations WHERE shareId = $1', [shareId]);
-    if (result.rowCount === 0) return null;
-    return getConversation(result.rows[0].sessionid);
+function getSharedConversation(shareId) {
+    const row = db.prepare('SELECT sessionId FROM shared_conversations WHERE shareId = ?').get(shareId);
+    if (!row) return null;
+    return getConversation(row.sessionId);
 }
 
-async function createSessionIfNotExist(sessionId, email, withPrompt = false) {
-    const exists = await pool.query('SELECT 1 FROM conversations WHERE id = $1', [sessionId]);
-    if (exists.rowCount === 0) {
-        await pool.query(
-            'INSERT INTO conversations (id, email, createdAt) VALUES ($1, $2, NOW())',
-            [sessionId, email]
-        );
+function createSessionIfNotExist(sessionId, email, withPrompt = false) {
+    const exists = db.prepare('SELECT 1 FROM conversations WHERE id = ?').get(sessionId);
+    if (!exists) {
+        db.prepare('INSERT INTO conversations (id, email, createdAt) VALUES (?, ?, ?)').run(sessionId, email, new Date().toISOString());
 
         if (withPrompt) {
             const systemPrompt = {
@@ -105,54 +92,44 @@ Bạn là trợ lý AI thông minh, luôn trả lời bằng **tiếng Việt**,
 📌 Luôn trả lời có trách nhiệm, không nói qua loa. Nếu thiếu thông tin, hãy hỏi lại người dùng để làm rõ.
 `
             };
-            await saveMessage(sessionId, systemPrompt.role, systemPrompt.content);
+            saveMessage(sessionId, systemPrompt.role, systemPrompt.content);
         }
     }
 }
 
-async function saveMessage(sessionId, role, content) {
-    await pool.query(
-        'INSERT INTO messages (sessionId, role, content, createdAt) VALUES ($1, $2, $3, NOW())',
-        [sessionId, role, JSON.stringify(content)]
+function saveMessage(sessionId, role, content) {
+    db.prepare('INSERT INTO messages (sessionId, role, content, createdAt) VALUES (?, ?, ?, ?)').run(
+        sessionId, role, JSON.stringify(content), new Date().toISOString()
     );
 }
 
-async function getConversation(sessionId) {
-    const result = await pool.query(
-        'SELECT role, content FROM messages WHERE sessionId = $1 ORDER BY id ASC',
-        [sessionId]
-    );
-    return result.rows.map(r => ({ role: r.role, content: JSON.parse(r.content) }));
+function getConversation(sessionId) {
+    return db.prepare('SELECT role, content FROM messages WHERE sessionId = ? ORDER BY id ASC')
+        .all(sessionId)
+        .map(row => ({ role: row.role, content: JSON.parse(row.content) }));
 }
 
-async function getSessionList(email) {
-    const result = await pool.query(`
+function getSessionList(email) {
+    return db.prepare(`
         SELECT c.id, c.createdAt, c.customName,
                (SELECT content FROM messages WHERE sessionId = c.id AND role = 'user' LIMIT 1) AS preview
         FROM conversations c
-        WHERE c.email = $1
+        WHERE c.email = ?
         ORDER BY createdAt DESC
-    `, [email]);
-    return result.rows;
+    `).all(email);
 }
 
-async function renameSession(sessionId, newName) {
-    await pool.query(
-        'UPDATE conversations SET customName = $1 WHERE id = $2',
-        [newName, sessionId]
-    );
+function renameSession(sessionId, newName) {
+    db.prepare('UPDATE conversations SET customName = ? WHERE id = ?').run(newName, sessionId);
 }
 
-async function deleteSession(sessionId) {
-    await pool.query('DELETE FROM messages WHERE sessionId = $1', [sessionId]);
-    await pool.query('DELETE FROM conversations WHERE id = $1', [sessionId]);
+function deleteSession(sessionId) {
+    db.prepare('DELETE FROM messages WHERE sessionId = ?').run(sessionId);
+    db.prepare('DELETE FROM conversations WHERE id = ?').run(sessionId);
 }
-
-async function getSessionInfo(sessionId) {
-    const result = await pool.query('SELECT * FROM conversations WHERE id = $1', [sessionId]);
-    return result.rows[0];
+function getSessionInfo(sessionId) {
+    return db.prepare('SELECT * FROM conversations WHERE id = ?').get(sessionId);
 }
-
 module.exports = {
     createSessionIfNotExist,
     saveMessage,

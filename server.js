@@ -13,30 +13,10 @@ const multer = require('multer');
 const fs = require('fs');
 const cors = require('cors');
 const db = require('./db');
-const pgSession = require('connect-pg-simple')(session);
-const { Pool } = require('pg');
 
 const app = express();
 const port = 5000;
 const upload = multer({ dest: 'uploads/' });
-const pgPool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
-
-app.use(session({
-    store: new pgSession({
-        pool: pgPool,
-        tableName: 'user_sessions',
-        createTableIfMissing: true
-    }),
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 ngày
-}));
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.use(cors({
     origin: [
@@ -49,6 +29,14 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.static('public'));
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -195,7 +183,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
 
     db.saveMessage(sessionId, userMessage.role, JSON.stringify(userMessage.content));
 
-    const allMessages = await db.getConversation(sessionId);
+    const allMessages = db.getConversation(sessionId);
     const userQuestionCount = allMessages.filter(m => m.role === 'user').length;
 
     // 👉 Đặt tên hội thoại nếu chưa có customName và đây là câu hỏi đầu tiên
@@ -209,9 +197,9 @@ app.post('/ask', upload.array('files'), async (req, res) => {
         db.renameSession(sessionId, summary);
     }
 
-    // if (userQuestionCount >= 5) {
-    //     return res.status(429).json({ reply: "Bạn đã dùng hết 5 lượt trong hôm nay. Vui lòng thử lại sau." });
-    // }
+    if (userQuestionCount >= 5) {
+        return res.status(429).json({ reply: "Bạn đã dùng hết 5 lượt trong hôm nay. Vui lòng thử lại sau." });
+    }
 
     const tokenLimit = 10000;
     const promptTokens = encode(allMessages.map(m =>
@@ -299,5 +287,5 @@ app.get('/ping', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`✅ Server PostgreSQL đang chạy tại http://localhost:${port}`);
+    console.log(`✅ Server SQLite đang chạy tại http://localhost:${port}`);
 });

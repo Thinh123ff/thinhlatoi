@@ -416,7 +416,6 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('https://thinhlatoi.onrender.com/ask', {
             method: 'POST',
             body: formData,
-            credentials: 'include',
             signal: signal
         })
             .then(response => {
