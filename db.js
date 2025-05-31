@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const crypto = require('crypto');
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -7,65 +8,43 @@ const pool = new Pool({
 
 async function initTables() {
     await pool.query(`
-    CREATE TABLE IF NOT EXISTS conversations (
-      id TEXT PRIMARY KEY,
-      email TEXT,
-      createdAt TIMESTAMPTZ,
-      customName TEXT
-    );
-    
-    CREATE TABLE IF NOT EXISTS messages (
-      id SERIAL PRIMARY KEY,
-      sessionId TEXT REFERENCES conversations(id) ON DELETE CASCADE,
-      role TEXT,
-      content TEXT,
-      createdAt TIMESTAMPTZ
-    );
-    
-    CREATE TABLE IF NOT EXISTS shared_conversations (
-      shareId TEXT PRIMARY KEY,
-      sessionId TEXT REFERENCES conversations(id) ON DELETE CASCADE,
-      createdAt TIMESTAMPTZ
-    );
-  `);
+        CREATE TABLE IF NOT EXISTS conversations (
+                                                     id TEXT PRIMARY KEY,
+                                                     email TEXT,
+                                                     createdAt TIMESTAMPTZ,
+                                                     customName TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS messages (
+                                                id SERIAL PRIMARY KEY,
+                                                sessionId TEXT REFERENCES conversations(id) ON DELETE CASCADE,
+            role TEXT,
+            content TEXT,
+            createdAt TIMESTAMPTZ
+            );
+
+        CREATE TABLE IF NOT EXISTS shared_conversations (
+                                                            shareId TEXT PRIMARY KEY,
+                                                            sessionId TEXT REFERENCES conversations(id) ON DELETE CASCADE,
+            createdAt TIMESTAMPTZ
+            );
+    `);
 }
+initTables();
 
-initTables(); // gọi khi load module
-
-db.exec(`
-    CREATE TABLE IF NOT EXISTS conversations (
-                                                 id TEXT PRIMARY KEY,
-                                                 email TEXT,
-                                                 createdAt TEXT,
-                                                 customName TEXT
-    );
-    CREATE TABLE IF NOT EXISTS messages (
-                                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                            sessionId TEXT,
-                                            role TEXT,
-                                            content TEXT,
-                                            createdAt TEXT,
-                                            FOREIGN KEY (sessionId) REFERENCES conversations(id)
-    );
-    CREATE TABLE IF NOT EXISTS shared_conversations (
-                                                        shareId TEXT PRIMARY KEY,
-                                                        sessionId TEXT,
-                                                        createdAt TEXT
-    );
-`);
-
-function createShare(sessionId) {
-    const shareId = require('crypto').randomUUID();
-    db.prepare('INSERT INTO shared_conversations (shareId, sessionId, createdAt) VALUES (?, ?, ?)').run(
-        shareId, sessionId, new Date().toISOString()
+async function createShare(sessionId) {
+    const shareId = crypto.randomUUID();
+    await pool.query(
+        'INSERT INTO shared_conversations (shareId, sessionId, createdAt) VALUES ($1, $2, NOW())',
+        [shareId, sessionId]
     );
     return shareId;
 }
 
-function getSharedConversation(shareId) {
-    const row = db.prepare('SELECT sessionId FROM shared_conversations WHERE shareId = ?').get(shareId);
-    if (!row) return null;
-    return getConversation(row.sessionId);
+async function getSharedConversation(shareId) {
+    const result = await pool.query('SELECT sessionId FROM shared_conversations WHERE shareId = $1', [shareId]);
+    if (result.rowCount === 0) return null;
+    return getConversation(result.rows[0].sessionid);
 }
 
 async function createSessionIfNotExist(sessionId, email, withPrompt = false) {
@@ -79,7 +58,52 @@ async function createSessionIfNotExist(sessionId, email, withPrompt = false) {
         if (withPrompt) {
             const systemPrompt = {
                 role: 'system',
-                content: `...` // Giữ nguyên đoạn prompt như cũ
+                content: `
+Bạn là trợ lý AI thông minh, luôn trả lời bằng **tiếng Việt**, với giọng văn **thân thiện, rõ ràng, có trách nhiệm** và trình bày **đẹp bằng Markdown**.
+
+### 🎯 Yêu cầu trình bày tổng quát
+- Trình bày có cấu trúc: tiêu đề chính dùng \`###\` hoặc **bold**.
+- Khi có danh sách mục, món ăn, công cụ → dùng icon phân loại, ví dụ:
+  - 🍲 **Canh chua cá lóc**
+  - 💻 **Visual Studio Code**
+- Sử dụng:
+  - **Danh sách gạch đầu dòng** để nêu từng ý.
+  - **Bảng Markdown** để so sánh hoặc tổng hợp.
+  - \`\`\`code block\`\`\` nếu trả lời có đoạn mã.
+- Cuối câu trả lời nên có 📌 **Tổng kết**, hoặc ✅ **Gợi ý tiếp theo** nếu phù hợp.
+
+### 🍽️ Nếu người dùng hỏi về món ăn / thực đơn / nấu nướng:
+- Trình bày từng món với icon + tiêu đề rõ.
+- Với mỗi món:
+  - **Nguyên liệu** (in đậm).
+  - **Cách làm** (in đậm).
+  - Có thể thêm ✅ *Lợi ích* nếu phù hợp.
+- Có thể tạo bảng tổng kết ví dụ:
+
+| Món ăn | Loại | Ưu điểm |
+|--------|------|---------|
+| 🥗 Salad gà | Món trộn | Ít calo, giàu protein |
+| 🥣 Súp bí đỏ | Món canh | No lâu, dễ nấu |
+
+### 🧠 Nếu người dùng hỏi về kiến thức, so sánh, đánh giá:
+- Bắt đầu bằng 🔹 **Giải thích**.
+- Đưa ra ✅ **Ví dụ minh họa**.
+- Kết thúc với 📌 **Tổng kết ngắn**.
+
+### 🔎 Nếu người dùng yêu cầu tìm kiếm web:
+- Hiển thị mỗi kết quả gồm:
+  - ✅ **Tên** (bold).
+  - 🔗 Link.
+  - 📄 Mô tả ngắn.
+- Có thể dùng bảng Markdown nếu có từ 2 kết quả trở lên.
+
+### 📁 Nếu người dùng tải lên file hoặc ảnh:
+- Đọc nội dung → Tóm tắt lại rõ ràng.
+- Nếu là file bài tập / code → Hiểu và giải thích.
+- Nếu ảnh là giao diện hoặc lỗi → phân tích giao diện hoặc lỗi, gợi ý cải thiện.
+
+📌 Luôn trả lời có trách nhiệm, không nói qua loa. Nếu thiếu thông tin, hãy hỏi lại người dùng để làm rõ.
+`
             };
             await saveMessage(sessionId, systemPrompt.role, systemPrompt.content);
         }
@@ -103,12 +127,12 @@ async function getConversation(sessionId) {
 
 async function getSessionList(email) {
     const result = await pool.query(`
-    SELECT c.id, c.createdAt, c.customName,
-           (SELECT content FROM messages WHERE sessionId = c.id AND role = 'user' LIMIT 1) AS preview
-    FROM conversations c
-    WHERE c.email = $1
-    ORDER BY createdAt DESC
-  `, [email]);
+        SELECT c.id, c.createdAt, c.customName,
+               (SELECT content FROM messages WHERE sessionId = c.id AND role = 'user' LIMIT 1) AS preview
+        FROM conversations c
+        WHERE c.email = $1
+        ORDER BY createdAt DESC
+    `, [email]);
     return result.rows;
 }
 
