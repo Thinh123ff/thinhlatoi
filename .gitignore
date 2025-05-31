@@ -1,6 +1,16 @@
 # Bỏ thư mục chứa thư viện
 node_modules/
 
+# Tệp dữ liệu
+chat.db
+data.json
+uploads/
+db.js
+
+# IDE/editor config
+.idea/
+.vscode/
+
 # Bỏ file cấu hình môi trường
 .env
 .env.local
