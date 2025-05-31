@@ -24,18 +24,6 @@ const pgPool = new Pool({
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-app.use(cors({
-    origin: [
-        'http://localhost:63342',
-        'http://127.0.0.1:5500',
-        'http://localhost:5000',
-        'https://thinhnt-mr.github.io'
-    ]
-}));
-
-app.use(express.json());
-app.use(express.static('public'));
-
 app.use(session({
     store: new pgSession({
         pool: pgPool,
@@ -49,6 +37,18 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(cors({
+    origin: [
+        'http://localhost:63342',
+        'http://127.0.0.1:5500',
+        'http://localhost:5000',
+        'https://thinhnt-mr.github.io'
+    ]
+}));
+
+app.use(express.json());
+app.use(express.static('public'));
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
