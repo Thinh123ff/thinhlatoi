@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Hội thoại được chia sẻ | Askiva</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/favicon_io/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon_io/favicon-32x32.png">
+  <link rel="shortcut icon" href="/favicon/favicon_io/favicon.ico?v=1.0">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/github-dark.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="dark-mode">
+<div id="chatContainer" class="chat-container">
+  <div id="messagesContainer" class="messages-container"></div>
+</div>
+
+<script>
+  const shareId = window.location.pathname.split('/').pop();
+  const messagesContainer = document.getElementById('messagesContainer');
+
+  function formatMessage(text) {
+    if (!text) return document.createTextNode('');
+    const html = marked.parse(text);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+
+    tempDiv.querySelectorAll('pre code').forEach(block => {
+      hljs.highlightElement(block);
+    });
+
+    return tempDiv;
+  }
+
+  function renderMessage(msg) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'message ' + (msg.role === 'user' ? 'user-message' : 'ai-message');
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+
+    if (typeof msg.content === 'string') {
+      // Thử parse xem có phải array không
+      try {
+        const parsed = JSON.parse(msg.content);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(item => {
+            if (item.type === 'text') {
+              contentDiv.appendChild(formatMessage(item.text));
+            } else if (item.type === 'image_url' && item.image_url?.url) {
+              const img = document.createElement('img');
+              img.src = item.image_url.url;
+              img.style.maxWidth = '240px';
+              img.style.borderRadius = '6px';
+              img.style.margin = '10px 0';
+              contentDiv.appendChild(img);
+            }
+          });
+        } else {
+          contentDiv.appendChild(formatMessage(msg.content));
+        }
+      } catch (e) {
+        contentDiv.appendChild(formatMessage(msg.content));
+      }
+    } else if (Array.isArray(msg.content)) {
+      msg.content.forEach(item => {
+        if (item.type === 'text') {
+          contentDiv.appendChild(formatMessage(item.text));
+        } else if (item.type === 'image_url' && item.image_url?.url) {
+          const img = document.createElement('img');
+          img.src = item.image_url.url;
+          img.style.maxWidth = '240px';
+          img.style.borderRadius = '6px';
+          img.style.margin = '10px 0';
+          contentDiv.appendChild(img);
+        }
+      });
+    }
+
+    wrapper.appendChild(contentDiv);
+    messagesContainer.appendChild(wrapper);
+  }
+
+  fetch(`/share-data/${shareId}`)
+          .then(res => res.json())
+          .then(data => {
+            messagesContainer.innerHTML = '';
+            data.history
+                    .filter(msg => msg.role !== 'system') // ✅ ẩn system prompt
+                    .forEach(renderMessage);
+          })
+          .catch(() => {
+            messagesContainer.innerHTML = '<p style="padding: 20px;">❌ Không tìm thấy hội thoại.</p>';
+          });
+</script>
+</body>
+</html>

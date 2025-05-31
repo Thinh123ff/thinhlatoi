@@ -1,5 +1,8 @@
 require('dotenv').config();
-console.log("🔑 BRAVE_API_KEY: Đã cấu hình",);
+const path = require('path');
+const session = require('express-session');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const axios = require('axios');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
@@ -9,6 +12,8 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const cors = require('cors');
+const db = require('./db');
+
 const app = express();
 const port = 5000;
 const upload = multer({ dest: 'uploads/' });
@@ -18,304 +23,59 @@ app.use(cors({
         'http://localhost:63342',
         'http://127.0.0.1:5500',
         'http://localhost:5000',
-        'https://thinhnt-mr.github.io',
+        'https://thinhnt-mr.github.io'
     ]
 }));
+
 app.use(express.json());
 app.use(express.static('public'));
 
-const sessions = {};
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
-function countTokensFromMessages(messages) {
-    const flatContent = messages.map(msg => {
-        if (typeof msg.content === 'string') return msg.content;
-        if (Array.isArray(msg.content)) {
-            return msg.content.map(item => item.text || '').join(' ');
-        }
-        return '';
-    }).join(' ');
-    return encode(flatContent).length;
-}
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: process.env.GOOGLE_CALLBACK_URL
+}, (accessToken, refreshToken, profile, done) => {
+    return done(null, profile);
+}));
 
-function getOrCreateSession(sessionId) {
-    if (!sessions[sessionId]) {
-        sessions[sessionId] = {
-            messages: [
-                {
-                    role: 'system',
-                    content: `
-Bạn là trợ lý AI thông minh, luôn trả lời bằng **tiếng Việt**, với giọng văn **thân thiện, rõ ràng, có trách nhiệm** và trình bày **đẹp bằng Markdown**.
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
 
-### 🎯 Yêu cầu trình bày tổng quát
-- Trình bày có cấu trúc: tiêu đề chính dùng \`###\` hoặc **bold**.
-- Khi có danh sách mục, món ăn, công cụ → dùng icon phân loại, ví dụ:
-  - 🍲 **Canh chua cá lóc**
-  - 💻 **Visual Studio Code**
-- Sử dụng:
-  - **Danh sách gạch đầu dòng** để nêu từng ý.
-  - **Bảng Markdown** để so sánh hoặc tổng hợp.
-  - \`\`\`code block\`\`\` nếu trả lời có đoạn mã.
-- Cuối câu trả lời nên có 📌 **Tổng kết**, hoặc ✅ **Gợi ý tiếp theo** nếu phù hợp.
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-### 🍽️ Nếu người dùng hỏi về món ăn / thực đơn / nấu nướng:
-- Trình bày từng món với icon + tiêu đề rõ.
-- Với mỗi món:
-  - **Nguyên liệu** (in đậm).
-  - **Cách làm** (in đậm).
-  - Có thể thêm ✅ *Lợi ích* nếu phù hợp.
-- Có thể tạo bảng tổng kết ví dụ:
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login-failed' }), (req, res) => {
+    res.redirect('/index.html');
+});
 
-| Món ăn | Loại | Ưu điểm |
-|--------|------|---------|
-| 🥗 Salad gà | Món trộn | Ít calo, giàu protein |
-| 🥣 Súp bí đỏ | Món canh | No lâu, dễ nấu |
-
-### 🧠 Nếu người dùng hỏi về kiến thức, so sánh, đánh giá:
-- Bắt đầu bằng 🔹 **Giải thích**.
-- Đưa ra ✅ **Ví dụ minh họa**.
-- Kết thúc với 📌 **Tổng kết ngắn**.
-
-### 🔎 Nếu người dùng yêu cầu tìm kiếm web:
-- Hiển thị mỗi kết quả gồm:
-  - ✅ **Tên** (bold).
-  - 🔗 Link.
-  - 📄 Mô tả ngắn.
-- Có thể dùng bảng Markdown nếu có từ 2 kết quả trở lên.
-
-### 📁 Nếu người dùng tải lên file hoặc ảnh:
-- Đọc nội dung → Tóm tắt lại rõ ràng.
-- Nếu là file bài tập / code → Hiểu và giải thích.
-- Nếu ảnh là giao diện hoặc lỗi → phân tích giao diện hoặc lỗi, gợi ý cải thiện.
-
-📌 Luôn trả lời có trách nhiệm, không nói qua loa. Nếu thiếu thông tin, hãy hỏi lại người dùng để làm rõ.
-`
-                }
-            ],
-            createdAt: new Date(),
-            requestTimestamps: []
-        };
-    }
-    return sessions[sessionId];
-}
-
-function cleanupSessions() {
-    const now = new Date();
-    Object.keys(sessions).forEach(id => {
-        const session = sessions[id];
-        const ageInHours = (now - new Date(session.createdAt)) / (1000 * 60 * 60);
-        if (ageInHours > 24) {
-            delete sessions[id];
-        }
-    });
-}
-setInterval(cleanupSessions, 1000 * 60 * 60);
-
-app.post('/ask', upload.array('files'), async (req, res) => {
-    const message = req.body.message || '';
-    const files = req.files || [];
-    const sessionId = req.body.sessionId || 'default';
-    const content = [{ type: 'text', text: `\n${message}` }];
-
-    let fullResponse = '';
-
-    try {
-        const session = getOrCreateSession(sessionId);
-        // Giới hạn lượt câu hỏi/session: tối đa 5 câu
-        const userQuestionCount = session.messages.filter(m => m.role === 'user').length;
-        if (userQuestionCount >= 5) {
-            return res.status(429).json({ reply: "Bạn đã dùng hết 5 lượt trong hôm nay. Vui lòng thử lại sau." });
-        }
-
-        // Giới hạn request nhanh: tối đa 5 request/phút
-        const now = Date.now();
-        session.requestTimestamps = session.requestTimestamps.filter(t => now - t < 60000);
-        if (session.requestTimestamps.length >= 5) {
-            return res.status(429).json({ reply: "⏳ Bạn đang gửi quá nhanh. Vui lòng chờ 1 phút rồi thử lại." });
-        }
-        session.requestTimestamps.push(now);
-
-        if (/tìm (trên mạng|web|Google|Bing|internet|link tải|công cụ|trang web|download)/i.test(message)) {
-            const searchResult = await searchBrave(message);
-
-            session.messages.push({
-                role: 'assistant',
-                content: `📡 **Kết quả từ Brave Search:**\n\n${searchResult}\n\n👉 Hãy sử dụng kết quả này để hỗ trợ trả lời câu hỏi của người dùng.`
-            });
-        }
-
-        for (const file of files) {
-            const buffer = fs.readFileSync(file.path);
-            const mime = file.mimetype;
-            const filename = file.originalname;
-
-            try {
-                if (mime === 'application/pdf') {
-                    const pdfData = await pdfParse(buffer);
-                    content.push({ type: 'text', text: `📄 ${filename}:\n\n${pdfData.text.slice(0, 5000)}` });
-                } else if (mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-                    const result = await mammoth.extractRawText({ buffer });
-                    content.push({ type: 'text', text: `📝 ${filename}:\n\n${result.value.slice(0, 5000)}` });
-                } else if (mime === 'text/csv') {
-                    const csvText = buffer.toString('utf8');
-                    const records = csvParse.parse(csvText, { columns: true });
-                    const preview = JSON.stringify(records.slice(0, 3), null, 2);
-                    content.push({ type: 'text', text: `📊 ${filename}:\n\n\`\`\`json\n${preview}\n\`\`\`` });
-                } else if (mime.startsWith('image/')) {
-                    const base64 = buffer.toString('base64');
-                    content.push({ type: 'image_url', image_url: { url: `data:${mime};base64,${base64}`, detail: 'auto' } });
-                } else if (mime.startsWith('audio/')) {
-                    const audioPath = file.path;
-                    const formData = new (require('form-data'))();
-                    formData.append('file', fs.createReadStream(audioPath));
-                    formData.append('model', 'whisper-1');
-
-                    const whisperRes = await axios.post('https://api.openai.com/v1/audio/transcriptions', formData, {
-                        headers: {
-                            'Authorization': `Bearer ${process.env.OPENAI_API_KEY_1}`,
-                            ...formData.getHeaders()
-                        }
-                    });
-
-                    content.push({ type: 'text', text: `🎵 ${filename}:\n\n${whisperRes.data.text}` });
-                } else {
-                    content.push({ type: 'text', text: `📎 ${filename}` });
-                }
-            } catch (err) {
-                content.push({ type: 'text', text: `⚠️ Không thể xử lý file ${filename}` });
-            }
-        }
-
-        let messageParts = [];
-
-        for (const c of content) {
-            if (c.type === 'text') {
-                messageParts.push(c.text.trim());
-            } else if (c.type === 'image_url') {
-                messageParts.push({
-                    type: 'image_url',
-                    image_url: c.image_url
-                });
-            }
-        }
-
-        // Nếu có ảnh → giữ dạng structured array; nếu chỉ có text → ghép chuỗi
-        let userMessage;
-        if (messageParts.some(p => typeof p === 'object')) {
-            userMessage = { role: 'user', content: messageParts };
-        } else {
-            userMessage = { role: 'user', content: messageParts.join('\n\n') };
-        }
-
-        session.messages.push(userMessage);
-
-        const maxMessages = 6;
-        if (session.messages.length > maxMessages) {
-            const [systemMsg, ...rest] = session.messages;
-            session.messages = [systemMsg, ...rest.slice(-maxMessages + 1)];
-        }
-
-        const tokenLimit = 10000;
-        const promptTokens = countTokensFromMessages(session.messages);
-        const safeMaxTokens = Math.min(4000, Math.max(800, tokenLimit - promptTokens));
-
-        // Tính lại Token
-        const completionTokens = encode(fullResponse).length;
-        console.log(`completionTokens: ${completionTokens}, totalTokens: ${promptTokens + completionTokens}`);
-
-        console.log('Đang gửi yêu cầu đến OpenAI...');
-        console.log(`promptTokens: ${promptTokens}, max_tokens: ${safeMaxTokens}`);
-        console.log(`Session ${sessionId} có ${session.messages.length} tin nhắn`);
-
-        let response;
-        try {
-            response = await sendToOpenAI(process.env.OPENAI_API_KEY_1, session.messages, safeMaxTokens);
-        } catch (err) {
-            if (err.response?.status === 429) {
-                console.warn("⚠️ Key 1 bị giới hạn, thử dùng Key 2...");
-                try {
-                    response = await sendToOpenAI(process.env.OPENAI_API_KEY_2, session.messages, safeMaxTokens);
-                } catch (err2) {
-                    console.error("🚫 Key 2 cũng bị lỗi:", err2.response?.data || err2.message);
-                    return res.status(500).json({ reply: "Cả hai API key đều bị giới hạn. Vui lòng thử lại sau vài phút." });
-                }
-            } else {
-                throw err; // Nếu lỗi khác 429 → ném ra để xử lý như cũ
-            }
-        }
-
-        files.forEach(f => fs.unlinkSync(f.path));
-
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-
-        response.data.on('data', chunk => {
-            const lines = chunk.toString().split('\n');
-            for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                    const data = line.slice(6);
-                    if (data === '[DONE]') {
-                        res.write(`data: [DONE]\n\n`);
-                        res.end();
-                        session.messages.push({ role: 'assistant', content: fullResponse });
-                        return;
-                    }
-                    try {
-                        const parsed = JSON.parse(data);
-                        const content = parsed.choices?.[0]?.delta?.content;
-                        if (content) {
-                            fullResponse += content;
-                            res.write(`data: ${JSON.stringify({ content })}\n\n`);
-                        }
-                    } catch (e) {
-                        console.error('Lỗi phân tích stream:', e);
-                    }
-                }
-            }
+app.get('/api/user', (req, res) => {
+    if (req.isAuthenticated()) {
+        const { displayName, emails, photos } = req.user;
+        res.json({
+            name: displayName,
+            email: emails[0].value,
+            avatar: photos[0].value
         });
-
-        response.data.on('error', err => {
-            console.error('Lỗi stream:', err);
-            res.status(500).json({ reply: "Lỗi khi nhận phản hồi từ OpenAI" });
-        });
-    } catch (err) {
-        console.error('Lỗi khi gọi OpenAI:');
-        if (err.response) {
-            console.error('Mã lỗi:', err.response.status);
-            console.error('Dữ liệu lỗi:', err.response.data);
-            res.status(500).json({
-                reply: `Lỗi từ OpenAI: ${err.response.data?.error?.message || 'Không xác định'}`
-            });
-        } else if (err.request) {
-            console.error('Không nhận được phản hồi:', err.request);
-            res.status(500).json({ reply: "Không nhận được phản hồi từ OpenAI." });
-        } else {
-            console.error('Lỗi:', err.message);
-            res.status(500).json({ reply: `Lỗi khi gửi yêu cầu: ${err.message}` });
-        }
+    } else {
+        res.status(401).json({ error: 'Chưa đăng nhập' });
     }
 });
 
-async function sendToOpenAI(apiKey, sessionMessages, maxTokens) {
-    return await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        {
-            model: 'gpt-4o',
-            messages: sessionMessages,
-            max_tokens: maxTokens,
-            temperature: 0.7,
-            stream: true
-        },
-        {
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            responseType: 'stream',
-            timeout: 120000
-        }
-    );
-}
+app.post('/api/logout', (req, res) => {
+    req.logout(err => {
+        if (err) return res.status(500).json({ error: 'Logout thất bại' });
+        res.json({ success: true });
+    });
+});
+
+// 👉 Tích hợp Brave Search lại
 async function searchBrave(query) {
     const res = await axios.get('https://api.search.brave.com/res/v1/web/search', {
         headers: {
@@ -327,32 +87,199 @@ async function searchBrave(query) {
             count: 3
         }
     });
-    return res.data.web.results.map(r => `${r.title}\n${r.url}\n${r.description}`).join('\n\n');
+    return res.data.web.results.map(r => `✅ **${r.title}**\n🔗 ${r.url}\n📄 ${r.description}`).join('\n\n');
 }
 
-// API lấy lịch sử hội thoại
-app.get('/conversation/:sessionId', (req, res) => {
-    const sessionId = req.params.sessionId;
-    const session = sessions[sessionId];
-
-    if (!session) {
-        return res.status(404).json({ error: 'Không tìm thấy phiên hội thoại' });
-    }
-
-    // Chỉ trả về tin nhắn của người dùng và AI (không trả về system message)
-    const conversationHistory = session.messages.slice(1);
-    res.json({ history: conversationHistory });
+app.get('/conversation-list', (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: 'Chưa đăng nhập' });
+    const email = req.user.emails[0].value;
+    const result = db.getSessionList(email).map(sess => ({
+        id: sess.id,
+        createdAt: sess.createdAt,
+        customName: sess.customName,
+        preview: sess.preview ? JSON.parse(sess.preview)?.text?.slice(0, 30) || '[File/Ảnh]' : '[...]'
+    }));
+    res.json({ sessions: result });
 });
 
-// API xóa hội thoại
+app.post('/conversation/:sessionId/rename', (req, res) => {
+    const sessionId = req.params.sessionId;
+    const newName = req.body.newName?.slice(0, 100).trim();
+    if (!newName) return res.status(400).json({ error: 'Thiếu tên' });
+    db.renameSession(sessionId, newName);
+    res.json({ success: true });
+});
+
 app.delete('/conversation/:sessionId', (req, res) => {
     const sessionId = req.params.sessionId;
-    if (sessions[sessionId]) {
-        delete sessions[sessionId];
-        res.json({ success: true, message: 'Đã xóa phiên hội thoại' });
-    } else {
-        res.status(404).json({ error: 'Không tìm thấy phiên hội thoại' });
+    db.deleteSession(sessionId);
+    res.json({ success: true, message: 'Đã xóa phiên hội thoại' });
+});
+
+app.get('/conversation/:sessionId', (req, res) => {
+    const sessionId = req.params.sessionId;
+    const history = db.getConversation(sessionId);
+    res.json({ history });
+});
+
+app.post('/ask', upload.array('files'), async (req, res) => {
+    const message = req.body.message || '';
+    const files = req.files || [];
+    const sessionId = req.body.sessionId || 'default';
+    let email = 'anonymous';
+
+    if (req.isAuthenticated && req.isAuthenticated()) {
+        email = req.user.emails[0].value;
     }
+
+    // 👉 Đảm bảo session mới sẽ được thêm prompt hệ thống
+    db.createSessionIfNotExist(sessionId, email, true);
+
+    if (/tìm (trên mạng|web|Google|Bing|internet|link tải|công cụ|trang web|download)/i.test(message)) {
+        const searchResult = await searchBrave(message);
+        const searchResponse = {
+            role: 'assistant',
+            content: `📡 **Kết quả từ Brave Search:**\n\n${searchResult}`
+        };
+        db.saveMessage(sessionId, searchResponse.role, searchResponse.content);
+        return res.json({ reply: searchResponse.content });
+    }
+
+    const content = [{ type: 'text', text: message }]
+    let fullResponse = '';
+
+    for (const file of files) {
+        const buffer = fs.readFileSync(file.path);
+        const mime = file.mimetype;
+        const filename = file.originalname;
+
+        try {
+            if (mime === 'application/pdf') {
+                const pdfData = await pdfParse(buffer);
+                content.push({ type: 'text', text: `📄 ${filename}:\n\n${pdfData.text.slice(0, 5000)}` });
+            } else if (mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                const result = await mammoth.extractRawText({ buffer });
+                content.push({ type: 'text', text: `📝 ${filename}:\n\n${result.value.slice(0, 5000)}` });
+            } else if (mime === 'text/csv') {
+                const csvText = buffer.toString('utf8');
+                const records = csvParse.parse(csvText, { columns: true });
+                const preview = JSON.stringify(records.slice(0, 3), null, 2);
+                content.push({ type: 'text', text: `📊 ${filename}:\n\n\`\`\`json\n${preview}\n\`\`\`` });
+            } else if (mime.startsWith('image/')) {
+                const base64 = buffer.toString('base64');
+                content.push({ type: 'image_url', image_url: { url: `data:${mime};base64,${base64}` } });
+            } else {
+                content.push({ type: 'text', text: `📎 ${filename}` });
+            }
+        } catch {
+            content.push({ type: 'text', text: `⚠️ Không thể xử lý file ${filename}` });
+        }
+    }
+
+    const messageParts = content.map(c => c.type === 'text' ? c.text.trim() : c);
+    const userMessage = messageParts.some(p => typeof p === 'object')
+        ? { role: 'user', content: messageParts }
+        : { role: 'user', content: messageParts.join('\n\n') };
+
+    db.saveMessage(sessionId, userMessage.role, JSON.stringify(userMessage.content));
+
+    const allMessages = db.getConversation(sessionId);
+    const userQuestionCount = allMessages.filter(m => m.role === 'user').length;
+
+    // 👉 Đặt tên hội thoại nếu chưa có customName và đây là câu hỏi đầu tiên
+    const sessionData = db.getSessionInfo(sessionId);
+    if (!sessionData?.customName && userQuestionCount === 1) {
+        const summary = typeof userMessage.content === 'string'
+            ? userMessage.content.slice(0, 50)
+            : Array.isArray(userMessage.content)
+                ? userMessage.content.find(c => typeof c === 'string')?.slice(0, 50) || '[File/Ảnh]'
+                : '[...]';
+        db.renameSession(sessionId, summary);
+    }
+
+    if (userQuestionCount >= 5) {
+        return res.status(429).json({ reply: "Bạn đã dùng hết 5 lượt trong hôm nay. Vui lòng thử lại sau." });
+    }
+
+    const tokenLimit = 10000;
+    const promptTokens = encode(allMessages.map(m =>
+        typeof m.content === 'string' ? m.content : JSON.stringify(m.content)).join(' ')
+    ).length;
+    const safeMaxTokens = Math.min(4000, Math.max(800, tokenLimit - promptTokens));
+
+    try {
+        const response = await axios.post(
+            'https://api.openai.com/v1/chat/completions',
+            {
+                model: 'gpt-4o',
+                messages: allMessages,
+                max_tokens: safeMaxTokens,
+                temperature: 0.7,
+                stream: true
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${process.env.OPENAI_API_KEY_1}`,
+                    'Content-Type': 'application/json'
+                },
+                responseType: 'stream',
+                timeout: 120000
+            }
+        );
+
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        response.data.on('data', chunk => {
+            const lines = chunk.toString().split('\n');
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const data = line.slice(6);
+                    if (data === '[DONE]') {
+                        db.saveMessage(sessionId, 'assistant', fullResponse);
+                        res.write(`data: [DONE]\n\n`);
+                        res.end();
+                        return;
+                    }
+                    try {
+                        const parsed = JSON.parse(data);
+                        const delta = parsed.choices?.[0]?.delta?.content;
+                        if (delta) {
+                            fullResponse += delta;
+                            res.write(`data: ${JSON.stringify({ content: delta })}\n\n`);
+                        }
+                    } catch {}
+                }
+            }
+        });
+
+        response.data.on('error', err => {
+            console.error('Lỗi stream:', err);
+            res.status(500).json({ reply: 'Lỗi khi nhận phản hồi từ OpenAI' });
+        });
+    } catch (err) {
+        console.error('Lỗi gửi OpenAI:', err);
+        res.status(500).json({ reply: err.message });
+    } finally {
+        files.forEach(f => fs.unlinkSync(f.path));
+    }
+});
+app.get('/share/:shareId', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'share.html'));
+});
+
+// API dùng JS trong share.html để lấy dữ liệu
+app.get('/share-data/:shareId', (req, res) => {
+    const history = db.getSharedConversation(req.params.shareId);
+    if (!history) return res.status(404).json({ error: 'Không tìm thấy hội thoại chia sẻ' });
+    res.json({ history });
+});
+
+app.post('/conversation/:sessionId/share', (req, res) => {
+    const sessionId = req.params.sessionId;
+    const shareId = db.createShare(sessionId); // từ db.js
+    res.json({ shareId });
 });
 
 app.get('/ping', (req, res) => {
@@ -360,10 +287,5 @@ app.get('/ping', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server đang chạy tại http://localhost:${port}`);
-    if (!process.env.OPENAI_API_KEY) {
-        console.error('⚠️ OPENAI_API_KEY chưa được thiết lập trong .env');
-    } else {
-        console.log('✅ OPENAI_API_KEY đã được cấu hình.');
-    }
+    console.log(`✅ Server SQLite đang chạy tại http://localhost:${port}`);
 });

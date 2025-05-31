@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/css/style.css">
+  <style>
+    #captcha-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #232323;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 999;
+    }
+    .title-captcha{
+      align-content: start;
+      font-family: Arial, sans-serif;
+    }
+    .title-captcha h1{
+      padding: 5px;
+      font-weight: normal;
+      font-family: Arial, sans-serif;
+      font-size: 40px;
+    }
+    .title-captcha h2{
+      font-family: Arial, sans-serif;
+      padding: 5px;
+      font-weight: normal;
+      font-size: 21px;
+    }
+    .cf-turnstile{
+      font-family: Arial, sans-serif;
+      padding-top: 20px;
+      font-weight: normal;
+    }
+    .captcha-footer{
+      position: relative;
+      bottom: -90px;
+      font-size: 14px;
+    }
+    .captcha-footer a{
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+    }
+    body {
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    body.loaded {
+      opacity: 1;
+    }
+    body.fade-out {
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+<div id="captcha-container">
+  <div class="title-captcha">
+    <h1>askiva.tech</h1>
+    <h2>Đang xác minh bạn là con người. Quá trình này có thể mất vài giây.</h2><br>
+    <div class="cf-turnstile" data-sitekey="0x4AAAAAABdwXJbVHp3xoEVh" data-callback="onCaptchaSuccess"></div><br><br><br>
+    <h2>askiva.tech cần đánh giá tính bảo mật kết nối của bạn trước khi tiếp tục.</h2>
+  </div>
+  <div class="captcha-footer">
+    <span>Tính bảo mật của <a href="https://www.cloudflare.com/security/">cloudflare</a></span>
+  </div>
+</div>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="/js/script.js"></script>
+<script>
+  function hasVerifiedToday() {
+    const today = new Date().toDateString();
+    return localStorage.getItem("captchaVerifiedDate") === today;
+  }
+
+  function setVerifiedToday() {
+    const today = new Date().toDateString();
+    localStorage.setItem("captchaVerifiedDate", today);
+  }
+
+  function onCaptchaSuccess() {
+    setVerifiedToday();
+    setTimeout(function() {
+      document.getElementById("captcha-container").style.display = "none";
+      document.getElementById("website-content").style.display = "block";
+    }, 1000);
+  }
+
+  window.onload = function() {
+    if (hasVerifiedToday()) {
+      document.getElementById("captcha-container").style.display = "none";
+      document.getElementById("website-content").style.display = "block";
+    }
+  }
+  marked.setOptions({
+    breaks: true,
+    gfm: true
+  });
+</script>
+<script>
+  function onCaptchaSuccess() {
+    const today = new Date().toISOString().split("T")[0];
+    localStorage.setItem("captchaChecked", today);
+
+    // Thêm class fade-out để tạo hiệu ứng
+    document.body.classList.add("fade-out");
+
+    // Chờ hiệu ứng xong rồi chuyển trang
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 400); // thời gian khớp với animation
+  }
+</script>
+</body>
+</html>

@@ -56,7 +56,7 @@ document.getElementById("enterBtn").addEventListener("click", () => {
     localStorage.setItem("lastVisit", today);
     document.body.style.opacity = "0";
     setTimeout(() => {
-        window.location.href = "index.html";
+        window.location.href = "captcha.html";
     }, 600); // thời gian fade-out
 });
 document.body.style.transition = "opacity 0.6s ease";

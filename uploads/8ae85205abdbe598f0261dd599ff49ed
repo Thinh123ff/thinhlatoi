@@ -1,0 +1,63 @@
+#include <stdio.h>
+int main()
+{
+    int n;
+    printf ("Hay nhap vao n=");
+    scanf("%d", &n);
+    int mang[n][n];
+    int cotd,cotc,dongd,dongc,i,j;
+    
+    cotd=0
+    cotc=n-1;
+    dongd=0
+    dongc=n-1
+    gt=1;
+    
+    while(dongd<=dongc && cotd<=cotc)
+    {
+    	//Gan gt cho dong dau
+	    for(i=cotd;i<=cotc;i++)
+	     {
+		     mang[dongd][i]=gt++;
+		 }
+		 dongd++;
+	     //Gan gt cho cot cuoi
+	     for(i=dongd;i<=dongc;i++)
+	     {
+		    mang[i][cotc]=gt++;
+		 }
+		 cotc--;
+		 //Gan gt cho dong cuoi
+		 
+		 for(i=cotc;i>=cotd;i--)
+		 {
+		    mang[dongc][i]=gt++;
+		 }
+		 dongc--;
+		 //Gan gt cho cot dau
+		 for(i=dongc;i>=dongd;i--)
+		 {
+		    mang[i][cotd]=gt++;
+		 }
+		 cotd++;
+		 
+	}
+
+    for(i=0;i<n;i++)
+    {
+	   for(j=0; j<n; j++)
+	   {
+	      printf("mang[%d][%d]=%d\t",i,j,mang[i][j]);
+	   }
+	   printf("\n");
+	}
+
+
+
+
+
+
+
+
+
+}
