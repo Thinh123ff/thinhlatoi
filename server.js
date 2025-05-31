@@ -287,5 +287,5 @@ app.get('/ping', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`✅ Server SQLite đang chạy tại http://localhost:${port}`);
+    console.log(`✅ Server PostgreSQL đang chạy tại http://localhost:${port}`);
 });
