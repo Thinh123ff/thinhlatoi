@@ -13,10 +13,16 @@ const multer = require('multer');
 const fs = require('fs');
 const cors = require('cors');
 const db = require('./db');
+const pgSession = require('connect-pg-simple')(session);
+const { Pool } = require('pg');
 
 const app = express();
 const port = 5000;
 const upload = multer({ dest: 'uploads/' });
+const pgPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
 app.use(cors({
     origin: [
@@ -31,9 +37,14 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.use(session({
+    store: new pgSession({
+        pool: pgPool,
+        tableName: 'user_sessions'
+    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 ngày
 }));
 app.use(passport.initialize());
 app.use(passport.session());
