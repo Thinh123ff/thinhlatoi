@@ -195,7 +195,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
 
     db.saveMessage(sessionId, userMessage.role, JSON.stringify(userMessage.content));
 
-    const allMessages = db.getConversation(sessionId);
+    const allMessages = await db.getConversation(sessionId);
     const userQuestionCount = allMessages.filter(m => m.role === 'user').length;
 
     // 👉 Đặt tên hội thoại nếu chưa có customName và đây là câu hỏi đầu tiên
@@ -209,9 +209,9 @@ app.post('/ask', upload.array('files'), async (req, res) => {
         db.renameSession(sessionId, summary);
     }
 
-    if (userQuestionCount >= 5) {
-        return res.status(429).json({ reply: "Bạn đã dùng hết 5 lượt trong hôm nay. Vui lòng thử lại sau." });
-    }
+    // if (userQuestionCount >= 5) {
+    //     return res.status(429).json({ reply: "Bạn đã dùng hết 5 lượt trong hôm nay. Vui lòng thử lại sau." });
+    // }
 
     const tokenLimit = 10000;
     const promptTokens = encode(allMessages.map(m =>
