@@ -5,7 +5,6 @@ node_modules/
 chat.db
 data.json
 uploads/
-db.js
 
 # IDE/editor config
 .idea/
