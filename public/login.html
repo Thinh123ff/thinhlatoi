@@ -58,7 +58,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     // Google login
     document.getElementById("second-google-login-btn").addEventListener("click", () => {
-      window.location.href = "http://localhost:5000/auth/google";
+      window.location.href = "https://thinhlatoi.onrender.com/auth/google/callback/auth/google";
     });
   });
 
@@ -67,7 +67,7 @@
     const email = document.getElementById('email-login').value;
     const password = document.getElementById('password-login').value;
 
-    fetch('http://localhost:5000/api/login', {
+    fetch('https://thinhlatoi.onrender.com/auth/google/callback/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
