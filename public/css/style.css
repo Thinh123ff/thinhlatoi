@@ -836,6 +836,10 @@ body.loaded {
     font-size: 18px;
 }
 pre code.hljs {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-width: 100%;
+    overflow-x: auto;
     background: #181818;
 }
 .message-content code {
