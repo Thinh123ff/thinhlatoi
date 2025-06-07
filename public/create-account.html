@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Register</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <style>
+        body {
+            background-color: #1F1B29;
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        body.loaded {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+<div id="from-login" class="from-login">
+    <div class="modal-content">
+        <form id="registerForm">
+            <h2 id="title-register" class="title-register">Đăng ký bằng email của bạn</h2>
+            <input type="email" placeholder="Email đăng ký" id="email-create" class="email-create"/>
+            <input type="password" placeholder="Mật khẩu" id="password-create" class="password-create"/>
+            <button id="create-button" class="create-button">Đăng ký</button>
+        </form>
+        <div class="_root_12co7_1" bis_skin_checked="1">
+            <div class="_line_12co7_7" bis_skin_checked="1"></div>
+            <div class="_name_12co7_12" bis_skin_checked="1">Hoặc</div>
+            <div class="_line_12co7_7" bis_skin_checked="1"></div>
+        </div>
+        <div id="second-google-login-btn" class="login-btn" title="Đăng nhập"><img src="/image/google-color-svgrepo-com.svg" width="18" height="18">Tiếp tục với Google</div>
+        <span>Bạn đã có tài khoản? <a href="login.html">Đăng nhập</a></span>
+        <div class="pr-20">
+            <div class="pr-18">
+                <span>Bằng cách tiếp tục, bạn đồng ý với <a href="terms.html">Điều khoản dịch vụ</a> và <a href="privacy.html">Chính sách bảo mật</a> của Askiva.</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/script.js"></script>
+<script src="https://cdn.lordicon.com/lordicon.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Google login click
+        document.getElementById("second-google-login-btn").addEventListener("click", () => {
+            window.location.href = "http://localhost:5000/auth/google";
+        });
+    });
+
+    document.getElementById('create-button').addEventListener('click', (event) => {
+        event.preventDefault();
+        const email = document.getElementById('email-create').value;
+        const password = document.getElementById('password-create').value;
+
+        fetch('http://localhost:5000/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = 'login.html'; // Chuyển hướng về trang login
+                } else {
+                    alert(data.error);
+                }
+            });
+    });
+</script>
+</body>
+</html>

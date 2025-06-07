@@ -2,11 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Askiva</title>
   <link rel="apple-touch-icon" sizes="180x180" href="/favicon-splash/favicon_io/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-splash/favicon_io/favicon-32x32.png">
   <link rel="shortcut icon" href="/favicon-splash/favicon_io/favicon.ico?v=1.0">
-  <link rel="stylesheet" href="css/splash.css">
+  <link rel="stylesheet" href="/css/splash.css">
+  <style>
+    body {
+      color: var(--text-color);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    body.loaded {
+      opacity: 1;
+    }
+  </style>
 </head>
 <body>
 <bh-container>
@@ -31,11 +45,12 @@
   </div>
 </div>
 <button id="enterBtn" class="start-button">Bắt đầu</button>
-<script src="js/splash.js"></script>
+<script src="/js/splash.js"></script>
+<script src="/js/script.js"></script>
 <script>
   function playAudio() {
     const audio = document.getElementById('bgAudio');
-    audio.volume = 1.0; // 🔊 Max volume (0.0 - 1.0)
+    audio.volume = 3.0; // 🔊 Max volume (0.0 - 1.0)
     audio.play().catch(err => console.error("Không thể phát audio:", err));
   }
 </script>

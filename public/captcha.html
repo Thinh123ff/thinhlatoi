@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Title</title>
     <link rel="stylesheet" href="/css/style.css">
   <style>
     #captcha-container {
       position: fixed;
       top: 0; left: 0;
+        padding: 20px;
+        color: white;
       width: 100%; height: 100%;
       background: #232323;
       display: flex;
@@ -48,14 +51,16 @@
       font-weight: bold;
     }
     body {
-      opacity: 0;
-      transition: opacity 0.4s ease;
+        background-color: #232323;
+        color: var(--text-color);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        transition: opacity 0.4s ease;
     }
     body.loaded {
-      opacity: 1;
-    }
-    body.fade-out {
-      opacity: 0;
+        opacity: 1;
     }
   </style>
 </head>
@@ -65,7 +70,7 @@
     <h1>askiva.tech</h1>
     <h2>Đang xác minh bạn là con người. Quá trình này có thể mất vài giây.</h2><br>
     <div class="cf-turnstile" data-sitekey="0x4AAAAAABdwXJbVHp3xoEVh" data-callback="onCaptchaSuccess"></div><br><br><br>
-    <h2>askiva.tech cần đánh giá tính bảo mật kết nối của bạn trước khi tiếp tục.</h2>
+    <h2>askiva cần đánh giá tính bảo mật kết nối của bạn trước khi tiếp tục.</h2>
   </div>
   <div class="captcha-footer">
     <span>Tính bảo mật của <a href="https://www.cloudflare.com/security/">cloudflare</a></span>
@@ -116,7 +121,7 @@
     // Chờ hiệu ứng xong rồi chuyển trang
     setTimeout(() => {
       window.location.href = "index.html";
-    }, 400); // thời gian khớp với animation
+    }, 1800); // thời gian khớp với animation
   }
 </script>
 </body>

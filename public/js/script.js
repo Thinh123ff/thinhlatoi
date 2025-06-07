@@ -17,6 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeBtn = document.getElementById("close-report");
     const cancelBtn = document.getElementById("cancel-report");
     const submitBtn = document.getElementById("submit-report");
+    const modelSelector = document.getElementById("modelSelector");
+    const dropdownTrigger = modelSelector.querySelector(".dropdown-trigger");
+    const selectedOption = dropdownTrigger.querySelector(".selected-option");
+    const dropdownMenu = modelSelector.querySelector(".dropdown-menu");
+    const dropdownOptions = dropdownMenu.querySelectorAll("li");
+    let mediaRecorder;
+    let audioChunks = [];
     let selectedFiles = [];
     let isGenerating = false; // Trạng thái AI đang trả lời
     let controller = null; // Để abort fetch nếu cần
@@ -24,6 +31,53 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentSessionId = localStorage.getItem('sessionId'); // Không tạo mới sớm
     let currentUserEmail = null;
     let isLoggedIn = false;
+    let currentModel = localStorage.getItem("chatModel") || "gpt-4o";
+
+    const initialOption = Array.from(dropdownOptions).find(
+        (opt) => opt.getAttribute("data-value") === currentModel
+    );
+    selectedOption.textContent = initialOption ? initialOption.textContent.trim() : "Mặc định";
+
+    // Toggle dropdown menu
+    dropdownTrigger.addEventListener("click", () => {
+        dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+        dropdownTrigger.querySelector(".dropdown-arrow").classList.toggle("open");
+
+        // Dynamic positioning with scroll and viewport consideration
+        const rect = dropdownTrigger.getBoundingClientRect();
+        const dropdownHeight = dropdownMenu.offsetHeight || 200; // Use actual height or default
+        const scrollY = window.scrollY || window.pageYOffset;
+        const viewportHeight = window.innerHeight;
+        const spaceAbove = rect.top + scrollY;
+        const spaceBelow = viewportHeight - rect.bottom;
+
+        if (spaceAbove < dropdownHeight + 10) { // Not enough space above
+            dropdownMenu.style.bottom = "auto";
+            dropdownMenu.style.top = "0";
+        } else { // Enough space above
+            dropdownMenu.style.top = "-100px";
+        }
+    });
+
+// Handle option selection
+    dropdownOptions.forEach(opt => {
+        opt.addEventListener("click", () => {
+            currentModel = opt.getAttribute("data-value");
+            selectedOption.innerHTML = opt.innerHTML.trim(); // Sử dụng innerHTML để giữ cả icon và văn bản
+            dropdownMenu.style.display = "none";
+            dropdownTrigger.querySelector(".dropdown-arrow").classList.remove("open");
+            localStorage.setItem("chatModel", currentModel);
+            showToast(`✅ Đã chọn công cụ`);
+        });
+    });
+
+// Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+        if (!modelSelector.contains(e.target)) {
+            dropdownMenu.style.display = "none";
+            dropdownTrigger.querySelector(".dropdown-arrow").classList.remove("open");
+        }
+    });
 
     function safeCapitalize(input) {
         try {
@@ -53,6 +107,11 @@ document.addEventListener('DOMContentLoaded', function() {
         overlay.classList.toggle('active');
     });
 
+    document.querySelector('.menu-right').addEventListener('click', () => {
+        sideMenu.classList.remove('open');
+        overlay.classList.remove('active');
+    });
+
     overlay.addEventListener('click', () => {
         sideMenu.classList.remove('open');
         overlay.classList.remove('active');
@@ -63,8 +122,15 @@ document.addEventListener('DOMContentLoaded', function() {
             showToast("❌ Vui lòng đăng nhập để tải ảnh.");
             return;
         }
+
+        if (currentModel === 'gpt-4.1') {
+            showToast("⚠️ 'Suy luận' không hỗ trợ ảnh. Hãy chọn Mặc định nếu muốn phân tích hình ảnh.");
+            return;
+        }
+
         document.getElementById('fileInput').click();
     });
+
     document.getElementById('uploadFileBtn').addEventListener('click', () => {
         if (!isLoggedIn) {
             showToast("❌ Vui lòng đăng nhập để tải file.");
@@ -201,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
         archiveCurrentConversation(); // Lưu và làm mới
     });
 
-// Theme toggle
+    // Theme toggle
     themeToggle.addEventListener('click', function() {
         document.body.classList.toggle('dark-mode');
         updateThemeIcon();
@@ -252,12 +318,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Scroll to bottom
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        scrollToBottom(true);
     }
 
-// Tải lịch sử hội thoại từ server
+    // Tải lịch sử hội thoại từ server
     function loadConversationHistory() {
-        fetch(`https://thinhlatoi.onrender.com/conversation/${currentSessionId}`)
+        fetch(`http://localhost:5000/conversation/${currentSessionId}`)
             .then(res => {
                 if (!res.ok) {
                     // Nếu không tìm thấy phiên (mã lỗi 404), tạo phiên mới
@@ -302,38 +368,35 @@ document.addEventListener('DOMContentLoaded', function() {
                                         img.style.borderRadius = '6px';
                                         enableImageZoom(img);
                                         contentDiv.appendChild(img);
-                                    } else if (item.type === 'text') {
-                                        const content = item.text.trim();
+                                    } else if (item.type === 'text' || typeof item === 'string') {
+                                        let content = item.type === 'text' ? item.text.trim() : item.trim();
 
-                                        // Nếu là file dạng 📄, 📎, 📊 thì chỉ hiện icon + tên
-                                        if (/^📄|^📎|^📊/.test(content)) {
-                                            const match = content.match(/^([📄📎📊]) (.+)$/);
-                                            if (match) {
-                                                const icon = match[1];
-                                                const filename = match[2];
+                                        // 👉 Check nếu là đoạn file (bắt đầu bằng icon và có nội dung dài)
+                                        const fileMatch = content.match(/^([📄📎📊💻📑📝])\s(.+?):\n+([\s\S]+)/);
+                                        if (fileMatch) {
+                                            const icon = fileMatch[1];
+                                            const filename = fileMatch[2].trim();
+                                            const preview = fileMatch[3].trim();
 
-                                                const fileEl = document.createElement('div');
-                                                fileEl.className = 'file-item';
+                                            const details = document.createElement('details');
+                                            details.className = 'file-preview-block';
 
-                                                const iconDiv = document.createElement('div');
-                                                iconDiv.className = 'file-icon-container';
-                                                iconDiv.textContent = icon;
+                                            const summary = document.createElement('summary');
+                                            summary.textContent = `${icon} ${filename}`;
+                                            details.appendChild(summary);
 
-                                                const nameDiv = document.createElement('div');
-                                                nameDiv.className = 'file-name';
-                                                nameDiv.textContent = filename;
+                                            const pre = document.createElement('pre');
+                                            pre.className = 'file-content';
+                                            pre.textContent = preview.slice(0, 1000); // Giới hạn hiển thị
+                                            details.appendChild(pre);
 
-                                                fileEl.appendChild(iconDiv);
-                                                fileEl.appendChild(nameDiv);
-                                                contentDiv.appendChild(fileEl);
-                                                return; // 👉 Đảm bảo không rơi xuống đoạn dưới
-                                            }
+                                            contentDiv.appendChild(details);
+                                            return; // ❗ tránh hiển thị lại như văn bản thường
                                         }
 
-                                        // Nếu không phải file dạng đặc biệt, hiển thị nội dung bình thường
+                                        // 👉 Không phải file — hiển thị bình thường
                                         const textEl = document.createElement('div');
                                         textEl.textContent = content;
-                                        textEl.style.marginTop = '4px';
                                         contentDiv.appendChild(textEl);
                                     }
                                 });
@@ -343,8 +406,44 @@ document.addEventListener('DOMContentLoaded', function() {
                             } else if (typeof msg.content === 'string') {
                                 addMessage(msg.content, 'user');
                             }
-                        }else if (msg.role === 'assistant') {
-                            addMessage(msg.content, 'ai');
+                        } else if (msg.role === 'assistant') {
+                            const aiContent = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
+
+                            // Nếu nội dung có dấu hiệu là file (📄 filename:\n\nnội dung)
+                            const fileMatch = aiContent.match(/^([📄📎📊💻📑📝])\s(.+?):\n\n([\s\S]+)/);
+                            if (fileMatch) {
+                                const icon = fileMatch[1];
+                                const filename = fileMatch[2].trim();
+                                const preview = fileMatch[3].trim();
+
+                                const messageDiv = document.createElement('div');
+                                messageDiv.className = 'message ai-message';
+                                const cardDiv = document.createElement('div');
+                                cardDiv.className = 'ai-card';
+                                const contentDiv = document.createElement('div');
+                                contentDiv.className = 'message-content';
+
+                                const details = document.createElement('details');
+                                details.className = 'file-preview-block';
+
+                                const summary = document.createElement('summary');
+                                summary.textContent = `${icon} ${filename}`;
+                                details.appendChild(summary);
+
+                                const pre = document.createElement('pre');
+                                pre.className = 'file-content';
+                                pre.textContent = preview.slice(0, 1000);
+                                details.appendChild(pre);
+
+                                contentDiv.appendChild(details);
+                                cardDiv.appendChild(contentDiv);
+                                messageDiv.appendChild(cardDiv);
+                                messagesContainer.appendChild(messageDiv);
+                                return;
+                            }
+
+                            // Nếu không phải file → render như cũ
+                            addMessage(aiContent, 'ai');
                         }
                     });
                     updateLayout();
@@ -355,82 +454,140 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-// ... existing code ...
+    // ... existing code ...
     function sendMessage() {
         if (!currentUserEmail) {
-            const suppressKey = 'suppressLoginPrompt';
+            const suppressKey = "suppressLoginPrompt";
             const lastShown = localStorage.getItem(suppressKey);
-            const today = new Date().toISOString().split('T')[0];
+            const today = new Date().toISOString().split("T")[0];
 
-            // Nếu hôm nay đã ẩn rồi thì không hiện lại
             if (lastShown !== today) {
-                document.getElementById('loginPrompt').classList.remove('hidden');
+                document.getElementById("loginPrompt").classList.remove("hidden");
                 return;
             }
         }
 
         const message = userInput.value.trim();
-        if (message === '') return;
+        if (message === "") return;
+        if (currentModel === "gpt-4.1" && selectedFiles.some((f) => f.type.startsWith("image/"))) {
+            showToast("⚠️ 'Suy luận' không hỗ trợ ảnh. Vui lòng chọn 'Mặc định' để tiếp tục.");
+            selectedFiles = selectedFiles.filter((f) => !f.type.startsWith("image/"));
+            updateFileDisplay();
+            return;
+        }
 
-        scrollToBottom(true);
-        userInput.value = '';
-        userInput.style.height = 'auto';
+        userInput.value = "";
+        userInput.style.height = "auto";
         sendBtn.disabled = !isGenerating;
 
-        // Xóa hiển thị file nếu có
-        const fileDisplay = document.getElementById('fileDisplay');
+        const fileDisplay = document.getElementById("fileDisplay");
         if (fileDisplay) {
             fileDisplay.remove();
         }
 
-        addMessage({ text: message, files: selectedFiles }, 'user');
+        addMessage({ text: message, files: selectedFiles }, "user");
 
         const formData = new FormData();
-        formData.append('message', message);
-        formData.append('sessionId', currentSessionId);
-        selectedFiles.forEach(file => formData.append('files', file));
+        formData.append("message", message);
+        formData.append("sessionId", currentSessionId);
+        formData.append("model", currentModel); // Ensure currentModel is sent
+        formData.append("anonymousToken", getAnonymousToken());
+        selectedFiles.forEach((file) => formData.append("files", file));
 
-        // 👇 Hiện typing indicator
-        typingIndicator.style.display = 'flex';
-        scrollToBottom(true);
+        typingIndicator.style.display = "flex";
 
         controller = new AbortController();
         const signal = controller.signal;
 
         isGenerating = true;
-        toggleSendStopButton('stop');
+        toggleSendStopButton("stop");
 
-        // Tạo message container cho AI response
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message', 'ai-message');
-        const cardDiv = document.createElement('div');
-        cardDiv.className = 'ai-card';
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message", "ai-message");
+        const cardDiv = document.createElement("div");
+        cardDiv.className = "ai-card";
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "message-content";
         cardDiv.appendChild(contentDiv);
         messageDiv.appendChild(cardDiv);
         messagesContainer.appendChild(messageDiv);
+        scrollToBottom(true);
+        setTimeout(() => scrollToBottom(true), 0);
 
-        let fullText = '';
+        let fullText = "";
 
-        fetch('https://thinhlatoi.onrender.com/ask', {
-            method: 'POST',
+        if (currentModel === "text-embedding-3-large") {
+            fetch("http://localhost:5000/api/ask-knowledge", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: message, model: currentModel }),
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    typingIndicator.style.display = "none";
+                    isGenerating = false;
+                    toggleSendStopButton("send");
+                    selectedFiles = [];
+
+                    if (data.answer) {
+                        addMessage(data.answer, "ai");
+                    } else {
+                        showToast("❌ Không nhận được phản hồi từ server.");
+                    }
+                })
+                .catch((err) => {
+                    showToast("❌ Lỗi: " + err.message);
+                    typingIndicator.style.display = "none";
+                    isGenerating = false;
+                    toggleSendStopButton("send");
+                });
+
+            return;
+        }
+
+        fetch("http://localhost:5000/ask", {
+            method: "POST",
             body: formData,
-            signal: signal
+            signal: signal,
         })
-            .then(response => {
+            .then((response) => {
                 if (!response.ok) {
-                    return response.json().then(data => {
+                    return response.json().then((data) => {
                         showToast(data.reply);
-                        typingIndicator.style.display = 'none';
+                        typingIndicator.style.display = "none";
                         isGenerating = false;
-                        toggleSendStopButton('send');
+                        toggleSendStopButton("send");
                         selectedFiles = [];
                     });
                 }
+
+                // ✅ Xử lý riêng cho gpt-4o-search-preview (không dùng stream)
+                if (currentModel === "gpt-4o-search-preview") {
+                    return response.json().then((data) => {
+                        typingIndicator.style.display = "none";
+                        isGenerating = false;
+                        toggleSendStopButton("send");
+                        selectedFiles = [];
+
+                        if (data.reply) {
+                            simulateStream(data.reply, contentDiv); // ✅ Truyền contentDiv vào
+                        } else {
+                            showToast("❌ Không nhận được phản hồi từ server.");
+                        }
+
+                        scrollToBottom(true);
+                    }).catch(err => {
+                        showToast("❌ Lỗi phản hồi: " + err.message);
+                        typingIndicator.style.display = "none";
+                        isGenerating = false;
+                        toggleSendStopButton("send");
+                    });
+                }
+
+                // ✅ Còn lại dùng stream như cũ
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                let buffer = '';
+                let buffer = "";
 
                 function processStream({ done, value }) {
                     if (done) {
@@ -438,26 +595,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
 
                     buffer += decoder.decode(value, { stream: true });
-                    const lines = buffer.split('\n');
+                    const lines = buffer.split("\n");
                     buffer = lines.pop();
 
                     for (const line of lines) {
-                        if (line.startsWith('data: ')) {
+                        if (line.startsWith("data: ")) {
                             const data = line.slice(6);
-                            if (data === '[DONE]') {
+                            if (data === "[DONE]") {
                                 return;
                             }
                             try {
                                 const parsed = JSON.parse(data);
                                 if (parsed.content) {
                                     fullText += parsed.content;
-                                    // Render markdown mỗi lần nhận được text mới
-                                    contentDiv.innerHTML = '';
+                                    contentDiv.innerHTML = "";
                                     contentDiv.appendChild(formatMessage(fullText));
                                     scrollToBottom(true);
                                 }
                             } catch (e) {
-                                console.error('Error parsing stream data:', e);
+                                console.error("Error parsing stream data:", e);
                             }
                         }
                     }
@@ -467,27 +623,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 return reader.read().then(processStream);
             })
-            .catch(err => {
-                if (err.name === 'AbortError') {
-                    console.log('Fetch aborted');
+            .catch((err) => {
+                if (err.name === "AbortError") {
+                    console.log("Fetch aborted");
                 } else {
-                    console.error('Stream error:', err);
-                    showToast("" + err.message); // ✅ chỉ hiển thị toast
-                    messageDiv.remove(); // ✅ Xoá luôn khung chat lỗi nếu cần
+                    console.error("Stream error:", err);
+                    showToast("" + err.message);
+                    messageDiv.remove();
                 }
             })
             .finally(() => {
                 typingIndicator.style.display = 'none';
                 isGenerating = false;
-                toggleSendStopButton('send');
+                toggleSendStopButton("send");
                 selectedFiles = [];
 
-                // 👉 Clear toàn bộ message cũ trên giao diện
-                messagesContainer.innerHTML = '';
-
-                // 👉 Load lại lịch sử hội thoại từ DB (bao gồm cả message vừa gửi)
-                loadConversationHistory();
+                scrollToBottom(true);
             });
+    }
+
+    function simulateStream(fullText, contentDiv) {
+        let index = 0;
+        let buffer = "";
+        const speed = 15; // ms mỗi ký tự
+
+        function step() {
+            if (index < fullText.length) {
+                buffer += fullText[index++];
+                contentDiv.innerHTML = "";
+                contentDiv.appendChild(formatMessage(buffer));
+                scrollToBottom(true);
+                setTimeout(step, speed);
+            }
+        }
+
+        step();
+    }
+
+    function getAnonymousToken() {
+        let token = localStorage.getItem("anonymousToken");
+        if (!token) {
+            token = cryptoRandomString(20);
+            localStorage.setItem("anonymousToken", token);
+        }
+        return token;
+    }
+
+    function cryptoRandomString(length) {
+        const array = new Uint8Array(length);
+        window.crypto.getRandomValues(array);
+        return Array.from(array, dec => ('0' + dec.toString(16)).substr(-2)).join('');
     }
 
     function addMessage(content, sender, isHistory = false) {
@@ -564,7 +749,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function formatMessage(text) {
-        // Thêm xử lý nếu text là undefined hoặc null
         if (!text) {
             const errorDiv = document.createElement('div');
             errorDiv.textContent = "Không nhận được phản hồi hoàn chỉnh. Vui lòng thử lại.";
@@ -580,30 +764,51 @@ document.addEventListener('DOMContentLoaded', function() {
             const codeBlocks = tempDiv.querySelectorAll('pre code');
 
             codeBlocks.forEach(block => {
-                // Highlight
+                // Tạo header cho khối code
+                const header = document.createElement('div');
+                header.className = 'code-header';
+
+                // Phát hiện ngôn ngữ từ highlight.js
+                let language = block.getAttribute('class')?.match(/language-(\w+)/)?.[1] || 'plaintext';
+                header.innerHTML = `
+        <span class="code-language">${language}</span>
+        <div class="code-actions">
+          <button class="copy-btn" title="Sao chép">
+            <svg width="18px" height="18px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#ccc">
+              <path d="M19.4 20H9.6C9.26863 20 9 19.7314 9 19.4V9.6C9 9.26863 9.26863 9 9.6 9H19.4C19.7314 9 20 9.26863 20 9.6V19.4C20 19.7314 19.7314 20 19.4 20Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15 9V4.6C15 4.26863 14.7314 4 14.4 4H4.6C4.26863 4 4 4.26863 4 4.6V14.4C4 14.7314 4.26863 15 4.6 15H9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg> Sao chép
+          </button>
+        </div>
+      `;
+
+                // Highlight code
                 hljs.highlightElement(block);
 
-                // Nút sao chép
-                const copyButton = document.createElement('button');
-                copyButton.innerHTML = '<?xml version="1.0" encoding="UTF-8"?><svg width="18px" height="18px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M19.4 20H9.6C9.26863 20 9 19.7314 9 19.4V9.6C9 9.26863 9.26863 9 9.6 9H19.4C19.7314 9 20 9.26863 20 9.6V19.4C20 19.7314 19.7314 20 19.4 20Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 9V4.6C15 4.26863 14.7314 4 14.4 4H4.6C4.26863 4 4 4.26863 4 4.6V14.4C4 14.7314 4.26863 15 4.6 15H9" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
-                copyButton.className = 'copy-btn';
+                // Thêm header vào trước khối code
+                const pre = block.parentElement;
+                pre.style.position = 'relative';
+                pre.insertBefore(header, block);
+
+                // Khôi phục logic sao chép với thay đổi icon
+                const copyButton = header.querySelector('.copy-btn');
                 copyButton.addEventListener('click', () => {
                     navigator.clipboard.writeText(block.innerText)
                         .then(() => {
-                            copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"\n' +
-                                '     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">\n' +
-                                '  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />\n' +
-                                '</svg>';
-                            setTimeout(() => copyButton.innerHTML = '<?xml version="1.0" encoding="UTF-8"?><svg width="18px" height="18px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M19.4 20H9.6C9.26863 20 9 19.7314 9 19.4V9.6C9 9.26863 9.26863 9 9.6 9H19.4C19.7314 9 20 9.26863 20 9.6V19.4C20 19.7314 19.7314 20 19.4 20Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 9V4.6C15 4.26863 14.7314 4 14.4 4H4.6C4.26863 4 4 4.26863 4 4.6V14.4C4 14.7314 4.26863 15 4.6 15H9" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>', 1500);
+                            const originalIcon = copyButton.innerHTML;
+                            copyButton.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>Đã sao chép
+            `;
+                            copyButton.title = 'Đã sao chép!';
+                            setTimeout(() => {
+                                copyButton.innerHTML = originalIcon;
+                                copyButton.title = 'Sao chép';
+                            }, 1500);
                         })
-                        .catch(err => {
-                            console.error('Copy failed:', err);
-                        });
+                        .catch(err => console.error('Copy failed:', err));
                 });
-
-                const pre = block.parentElement;
-                pre.style.position = 'relative';
-                pre.appendChild(copyButton);
             });
 
             return tempDiv;
@@ -617,25 +822,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function scrollToBottom(force = false) {
-        setTimeout(() => {
+        requestAnimationFrame(() => {
             if (force) {
-                messagesContainer.scrollTo({
-                    top: messagesContainer.scrollHeight,
-                    behavior: 'smooth'
-                });
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
             } else {
-                const isNearBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 200;
+                const isNearBottom = messagesContainer.scrollHeight
+                    - messagesContainer.scrollTop
+                    - messagesContainer.clientHeight < 200;
                 if (isNearBottom) {
-                    messagesContainer.scrollTo({
-                        top: messagesContainer.scrollHeight,
-                        behavior: 'smooth'
-                    });
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 }
             }
-        }, 0);
+        });
     }
 
-// Khởi tạo giao diện
+    // Khởi tạo giao diện
     updateLayout();
 
     function toggleSendStopButton(state) {
@@ -678,26 +879,36 @@ document.addEventListener('DOMContentLoaded', function() {
             showToast("❌ Bạn cần đăng nhập để dán ảnh.");
             return;
         }
-        if (!event.clipboardData || !event.clipboardData.items) return;
 
-        const items = event.clipboardData.items;
+        const items = event.clipboardData?.items;
+        if (!items) return;
+
+        // Kiểm tra có ảnh trong clipboard không
         for (const item of items) {
             if (item.type.indexOf('image') !== -1) {
+                if (currentModel === 'gpt-4.1') {
+                    showToast("⚠️ 'Suy luận' không hỗ trợ ảnh. Hãy chọn 'Mặc định' để dùng ảnh.");
+                    return;
+                }
+
                 const blob = item.getAsFile();
                 if (selectedFiles.length >= 4) {
                     alert('❌ Bạn chỉ được chọn tối đa 4 file.');
                     return;
                 }
 
-                // Tạo tên file giả lập
                 const fakeFile = new File([blob], `screenshot-${Date.now()}.png`, { type: blob.type });
                 selectedFiles.push(fakeFile);
                 updateFileDisplay();
+                event.preventDefault(); // chặn paste text nếu ảnh được xử lý
+                return;
             }
         }
+
+        // 👉 Nếu không có ảnh: mặc định cho dán text
     });
 
-// Lắng nghe thay đổi chế độ màu của hệ thống
+    // Lắng nghe thay đổi chế độ màu của hệ thống
     if (window.matchMedia) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
             // Chỉ áp dụng thay đổi nếu người dùng chưa tự chọn chế độ
@@ -713,7 +924,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     clearBtn.addEventListener('click', function () {
-        fetch('https://thinhlatoi.onrender.com/api/user', { credentials: 'include' })
+        fetch('http://localhost:5000/api/user', { credentials: 'include' })
             .then(res => res.json())
             .then(user => {
                 const newSessionId = generateSessionId(user.email);
@@ -764,7 +975,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Gọi API lấy user (nếu có session)
-    fetch('https://thinhlatoi.onrender.com/api/user', { credentials: 'include' })
+    fetch('http://localhost:5000/api/user', { credentials: 'include' })
         .then(res => {
             if (!res.ok) throw new Error('Chưa đăng nhập');
             return res.json();
@@ -772,11 +983,19 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(user => showUser(user))
         .catch(() => {
             document.getElementById('login-container').style.display = 'block';
+
+            const prompt = document.getElementById('loginPrompt');
+            prompt.classList.remove('hidden');
+
+            // ✅ Thêm hiệu ứng hiển thị mượt
+            setTimeout(() => {
+                prompt.classList.add('fade-in');
+            }, 700); // delay nhẹ để tránh hiển thị ngay lập tức
         });
 
     // Sự kiện đăng nhập
     document.getElementById("custom-login-btn").addEventListener("click", () => {
-        window.location.href = "https://thinhlatoi.onrender.com/auth/google";
+        window.location.href = "http://localhost:5000/auth/google";
     });
 
     // Sự kiện đăng xuất
@@ -784,10 +1003,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const dropdown = document.getElementById("dropdown");
         dropdown.innerHTML = `<p style="color: #ccc; margin: 0;">Đang đăng xuất...</p>`;
         setTimeout(() => {
-            fetch('https://thinhlatoi.onrender.com/api/logout', {
+            fetch('http://localhost:5000/api/logout', {
                 method: 'POST',
                 credentials: 'include'
-            }).then(() => location.reload());
+            }).then(() => {
+                localStorage.removeItem('sessionId');
+                location.reload();
+            });
         }, 1200);
     });
 
@@ -805,7 +1027,7 @@ document.addEventListener('DOMContentLoaded', function() {
         isLoggedIn = true;
         document.getElementById("login-container").style.display = "none";
         document.getElementById("user-area").style.display = "flex";
-        document.getElementById("avatar").src = user.avatar || user.picture;
+        document.getElementById("avatar").src = `${user.avatar}?v=${Date.now()}`;
         document.getElementById("email").textContent = user.email;
         document.getElementById("dropdown").style.display = "none";
 
@@ -822,7 +1044,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadConversationMenu(email) {
-        fetch('https://thinhlatoi.onrender.com/conversation-list', { credentials: 'include' })
+        fetch('http://localhost:5000/conversation-list', { credentials: 'include' })
             .then(res => res.json())
             .then(data => {
                 const menu = document.querySelector('.menu-content');
@@ -950,7 +1172,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function shareConversation(sessionId) {
-        fetch(`https://thinhlatoi.onrender.com/conversation/${sessionId}/share`, {
+        fetch(`http://localhost:5000/conversation/${sessionId}/share`, {
             method: 'POST'
         })
             .then(res => res.json())
@@ -991,7 +1213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const newName = prompt("Nhập tên mới cho cuộc hội thoại:", currentName);
         if (!newName || newName.trim() === '') return;
 
-        fetch(`https://thinhlatoi.onrender.com/conversation/${sessionId}/rename`, {
+        fetch(`http://localhost:5000/conversation/${sessionId}/rename`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ newName })
@@ -1006,7 +1228,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function confirmDeleteSession(sessionId) {
         if (!confirm("Bạn có chắc muốn xoá cuộc hội thoại này?")) return;
 
-        fetch(`https://thinhlatoi.onrender.com/conversation/${sessionId}`, {
+        fetch(`http://localhost:5000/conversation/${sessionId}`, {
             method: 'DELETE'
         })
             .then(res => {
@@ -1019,9 +1241,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('continueAnyway').addEventListener('click', () => {
         document.getElementById('loginPrompt').classList.add('hidden');
 
-        // Ghi nhớ rằng hôm nay đã ẩn cảnh báo
-        const today = new Date().toISOString().split('T')[0];
-        localStorage.setItem('suppressLoginPrompt', today);
+        const prompt = document.getElementById('loginPrompt');
+        prompt.classList.remove('fade-in');
+
+        setTimeout(() => {
+            prompt.classList.add('hidden');
+        }, 400); // chờ hiệu ứng mờ đi hoàn tất rồi mới ẩn
     });
 
     // Mở modal
@@ -1060,6 +1285,131 @@ document.addEventListener('DOMContentLoaded', function() {
         const captchaContainer = document.getElementById("captcha-container");
         if (captchaContainer) {
             captchaContainer.style.display = "none";
+        }
+    }
+
+    // Khi người dùng đăng nhập thành công
+    fetch('http://localhost:5000/api/user', { credentials: 'include' })
+        .then(res => res.json())
+        .then(user => {
+            document.getElementById('avatar').src = user.avatar || 'default-avatar.png';
+            document.getElementById('email').textContent = user.email;
+            currentUserEmail = user.email;
+        });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('justLoggedIn') === '1') {
+        waitForAvatar();
+    }
+
+    function waitForAvatar() {
+        fetch('http://localhost:5000/api/user', { credentials: 'include' })
+            .then(res => res.json())
+            .then(user => {
+                // Nếu avatar vẫn là default thì tiếp tục chờ
+                if (user.avatar.includes('default-avatar.png')) {
+                    console.log('⏳ Đang tải avatar...');  // log cho dev check
+                    setTimeout(waitForAvatar, 500); // tiếp tục kiểm tra sau 500ms
+                } else {
+                    // Khi avatar đã sẵn sàng, render giao diện
+                    showUser(user);
+                    history.replaceState(null, '', '/index.html');
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi kiểm tra avatar:', err);
+                setTimeout(waitForAvatar, 1000);
+            });
+    }
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            sendAudioToServer(audioBlob);
+            audioChunks = [];
+        };
+
+        document.getElementById('recordBtn').addEventListener('click', () => {
+            const micIcon = document.querySelector('.mic-icon');
+            const stopIcon = document.querySelector('.stop-icon');
+            const recordingBar = document.querySelector('.recording-bar');
+            if (mediaRecorder.state === 'inactive') {
+                mediaRecorder.start();
+                micIcon.style.display = 'none';
+                stopIcon.style.display = 'block';
+                recordingBar.classList.remove('hidden');
+                recordingBar.classList.add('pulsate'); // Add pulsate class for animation
+                userInput.value = "";
+                userInput.setAttribute("readonly", true);
+                userInput.placeholder = ""; // Ẩn placeholder
+                userInput.classList.add("recording"); // để thêm style nếu cần
+                document.getElementById('uploadImageBtn').disabled = true;
+                document.getElementById('uploadFileBtn').disabled = true;
+                console.log("🎙️ Đang ghi âm...");
+            } else {
+                mediaRecorder.stop();
+                micIcon.style.display = 'block';
+                stopIcon.style.display = 'none';
+                recordingBar.classList.add('hidden');
+                recordingBar.classList.remove('pulsate'); // Remove pulsate class when stopping
+                userInput.removeAttribute("readonly");
+                userInput.placeholder = "Bạn đang nghĩ gì?...";
+                userInput.classList.remove("recording");
+                document.getElementById('uploadImageBtn').disabled = false;
+                document.getElementById('uploadFileBtn').disabled = false;
+                console.log("✅ Dừng ghi âm.");
+                showToast("Đang xử lý giọng nói...");
+            }
+        });
+    });
+
+    function sendAudioToServer(audioBlob) {
+        const formData = new FormData();
+        formData.append('audio', audioBlob);
+        formData.append('sessionId', currentSessionId);
+        formData.append('model', currentModel);
+
+        fetch('http://localhost:5000/api/upload-audio', {
+            method: 'POST',
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.transcript) {
+                    userInput.value = data.transcript;
+                    sendBtn.disabled = false;
+                    showToast("✅ Đã nhận dạng giọng nói, hãy nhấn gửi câu hỏi.");
+                } else {
+                    addMessage("🎤 Chưa nhận được nội dung từ âm thanh. Bạn hãy thử ghi lại nhé!", "ai");
+                }
+            })
+            .catch(err => {
+                console.error("Lỗi khi gửi ghi âm:", err);
+                showToast("⚠️ Gặp lỗi khi xử lý âm thanh. Hãy thử lại.");
+            });
+    }
+
+    function handleTranscript(transcriptText) {
+        const text = transcriptText.trim().toLowerCase();
+
+        const isUnclear =
+            text === "" ||
+            text.length < 3 ||
+            /^[?.!,\s]+$/.test(text) ||               // chỉ dấu câu hoặc khoảng trắng
+            /(ư|ờ|uh|à|ơ|ờ|hả|gì|hử)+$/i.test(text);  // âm không rõ cuối
+
+        if (isUnclear) {
+            addMessage("🎤 Âm thanh chưa rõ, bạn có thể ghi âm lại không?");
+        } else {
+            addMessage({ text }, "user");
+            userInput.value = text;
+            sendMessage();
         }
     }
 });

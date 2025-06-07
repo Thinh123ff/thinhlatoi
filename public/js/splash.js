@@ -4,14 +4,14 @@ const playAudio = () => {
     audio.play();
 }
 // Typewriter effect
-const text = "Chào mừng bạn đến với vũ trụ bí ẩn. Hãy chuẩn bị để khám phá những điều kỳ diệu đang chờ đợi...";
+const text = "Chào mừng bạn đến với vũ trụ bí ẩn. Bạn chỉ có 5 cơ hội để khám phá đó nhé...";
 const textElement = document.getElementById('textContent');
 const cursorElement = document.getElementById('cursor');
 const typewriterContainer = document.getElementById('typewriterContainer');
 const enterButton = document.getElementById('enterBtn');
 
 let i = 0;
-const typingSpeed = 80;
+const typingSpeed = 70;
 const pauseAfterComplete = 800;
 const fadeOutDuration = 500;
 
