@@ -2,7 +2,6 @@
 node_modules/
 
 # Tệp dữ liệu
-chat.db
 data.json
 uploads/
 
