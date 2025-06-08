@@ -28,6 +28,12 @@ db.exec(`
                                          email TEXT PRIMARY KEY,
                                          password TEXT
     );
+    CREATE TABLE IF NOT EXISTS user_settings (
+                                                 email TEXT PRIMARY KEY,
+                                                 enabledModels TEXT,
+                                                 enableRecordButton INTEGER,
+                                                 dailyQuestionLimit INTEGER
+    );
 `);
 
 function registerUser(email, hashedPassword) {
@@ -338,6 +344,42 @@ function updateSessionEmail(sessionId, email) {
     db.prepare('UPDATE conversations SET email = ? WHERE id = ?').run(email, sessionId);
 }
 
+function updateUserSettings(email, settings) {
+    const existing = db.prepare('SELECT * FROM user_settings WHERE email = ?').get(email);
+    if (existing) {
+        db.prepare(`
+            UPDATE user_settings 
+            SET enabledModels = ?, enableRecordButton = ?, dailyQuestionLimit = ? 
+            WHERE email = ?
+        `).run(
+            JSON.stringify(settings.enabledModels),
+            settings.enableRecordButton ? 1 : 0,
+            settings.dailyQuestionLimit,
+            email
+        );
+    } else {
+        db.prepare(`
+            INSERT INTO user_settings (email, enabledModels, enableRecordButton, dailyQuestionLimit)
+            VALUES (?, ?, ?, ?)
+        `).run(
+            email,
+            JSON.stringify(settings.enabledModels),
+            settings.enableRecordButton ? 1 : 0,
+            settings.dailyQuestionLimit
+        );
+    }
+}
+
+function getUserSettings(email) {
+    const row = db.prepare('SELECT * FROM user_settings WHERE email = ?').get(email);
+    return row ? {
+        email: row.email,
+        enabledModels: JSON.parse(row.enabledModels),
+        enableRecordButton: !!row.enableRecordButton,
+        dailyQuestionLimit: row.dailyQuestionLimit
+    } : null;
+}
+
 module.exports = {
     createSessionIfNotExist,
     saveMessage,
@@ -355,4 +397,6 @@ module.exports = {
     findUserByEmail,
     updateSessionEmail,
     countAnonymousMessagesToday,
+    getUserSettings,
+    updateUserSettings,
 };

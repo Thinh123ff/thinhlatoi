@@ -246,13 +246,23 @@ app.post('/ask', upload.array('files'), async (req, res) => {
 
     if (email !== 'anonymous') {
         const todayCount = db.countUserMessagesToday(email);
-        if (todayCount >= 10) {
-            return res.status(429).json({ reply: "❌ Bạn đã dùng hết 5 lượt hôm nay. Vui lòng thử lại vào ngày mai." });
+        const settings = db.getUserSettings(email);
+        const limit = settings?.dailyQuestionLimit || 5;
+        if (todayCount >= limit) {
+            return res.status(429).json({
+                showBanner: true,
+                bannerMessage: "Tận hưởng tốt hơn khi bạn nâng cấp lên Askiva Pro hoặc thử lại sau 24h!"
+            });
         }
     } else {
         const todayCount = db.countAnonymousMessagesToday(anonymousToken);
-        if (todayCount >= 10) {
-            return res.status(429).json({ reply: "❌ Bạn đã dùng hết 5 lượt hôm nay. Vui lòng thử lại vào ngày mai." });
+        const settings = db.getUserSettings(email);
+        const limit = settings?.dailyQuestionLimit || 5;
+        if (todayCount >= limit) {
+            return res.status(429).json({
+                showBanner: true,
+                bannerMessage: "Tận hưởng tốt hơn khi bạn nâng cấp lên Askiva Pro hoặc thử lại sau 24h!"
+            });
         }
     }
 
@@ -434,13 +444,6 @@ ${braveRes.data.web.results.map((r, i) =>
                 ? userMessage.content.find(c => typeof c === 'string')?.slice(0, 50) || '[File/Ảnh]'
                 : '[...]';
         db.renameSession(sessionId, summary);
-    }
-
-    if (email && email !== 'anonymous') {
-        const todayCount = db.countUserMessagesToday(email);
-        if (todayCount >= 10) {
-            return res.status(429).json({ reply: "❌ Bạn đã dùng hết 5 lượt hôm nay. Vui lòng thử lại vào ngày mai." });
-        }
     }
 
     const tokenLimit = 10000;
@@ -646,8 +649,10 @@ app.post('/api/ask-knowledge', async (req, res) => {
     }
 
     const todayCount = db.countUserMessagesToday(email);
-    if (todayCount >= 10) {
-        return res.status(429).json({ answer: "❌ Bạn đã dùng hết 5 lượt hôm nay. Vui lòng thử lại vào ngày mai." });
+    const settings = db.getUserSettings(email);
+    const limit = settings?.dailyQuestionLimit || 5;
+    if (todayCount >= limit) {
+        return res.status(429).json({ answer: "Nâng cấp lên gói Askiva Pro để tăng tính trải nghiệm hoặc thử lại sau 24h!" });
     }
 
     const wiki = await fetchWikipediaSummary(question);
@@ -738,6 +743,45 @@ ${results.map((r, i) =>
     ).join('\n')}
     `;
 }
+
+app.post('/admin/update-settings', (req, res) => {
+    const { email, verifyPassword, reset } = req.body;
+
+    if (verifyPassword !== process.env.ADMIN_SECRET) {
+        return res.status(403).json({ error: 'Mật khẩu xác minh sai!' });
+    }
+
+    if (reset === true) {
+        db.updateUserSettings(email, {
+            enabledModels: [],
+            enableRecordButton: false,
+            dailyQuestionLimit: 5
+        });
+    } else {
+        db.updateUserSettings(email, {
+            enabledModels: ['text-embedding-3-large', 'gpt-4o-search-preview'],
+            enableRecordButton: true,
+            dailyQuestionLimit: 15
+        });
+    }
+
+    res.json({ success: true });
+});
+
+app.get('/api/user/settings', (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: 'Chưa đăng nhập' });
+    const email = req.user.emails[0].value;
+    const settings = db.getUserSettings(email);
+    res.json(settings || {});
+});
+
+app.get('/api/settings', (req, res) => {
+    const email = req.query.email;
+    if (!email) return res.status(400).json({ error: 'Thiếu email' });
+
+    const settings = db.getUserSettings(email);
+    res.json(settings || {});
+});
 
 app.get('/ping', (req, res) => {
     res.send('pong');

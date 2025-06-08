@@ -29,6 +29,9 @@
 ::-webkit-scrollbar-thumb:hover {
     background-color: #888;
 }
+.hidden {
+    display: none !important;
+}
 * {
     margin: 0;
     padding: 0;
@@ -55,6 +58,107 @@ body.loaded {
     background: none;
     justify-content: space-between;
 }
+.header-center {
+    flex-grow: 1;
+    text-align: center;
+    position: relative;
+}
+
+.limit-banner {
+    display: none;
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #252029;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.limit-banner .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.upgrade-button {
+    display: none;
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99;
+}
+.upgrade-button .upgrade-btn {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, #4a2e8e 0%, #8a4af3 50%, #4a2e8e 100%);
+    background-size: 200% 200%;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(138, 74, 243, 0.3); /* Bóng tím nhạt, hài hòa với giao diện */
+    transition: all 0.4s ease, transform 0.2s ease;
+    animation: flowGradient 12s ease infinite; /* Tăng thời gian để mượt hơn */
+}
+
+@keyframes flowGradient {
+    0% {
+        background-position: 100% 0;
+    }
+    50% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 100% 0;
+    }
+}
+
+/* Hiệu ứng bóng bảy mượt mà */
+.upgrade-button .upgrade-btn::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -30%;
+    width: 160%;
+    height: 160%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+    z-index: 1;
+    animation: glossyEffect 6s ease-in-out infinite;
+}
+
+@keyframes glossyEffect {
+    0% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(10%, 10%);
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+/* Hiệu ứng hover để nổi bật */
+.upgrade-button .upgrade-btn:hover {
+    transform: translateY(-3px); /* Nổi cao hơn một chút */
+    box-shadow: 0 6px 20px rgba(138, 74, 243, 0.5); /* Bóng đậm hơn khi hover */
+}
+
 .menu-icon{
     position: fixed;
     padding: 2px;
@@ -1400,7 +1504,7 @@ body.dark-mode .dropdown-trigger {
     margin: 4px 0 0;
     padding: 5px;
     z-index: 1010;
-    max-height: 200px;
+    min-height: 155px;
     overflow-y: auto;
     box-sizing: border-box;
 }
@@ -1751,6 +1855,18 @@ body.dark-mode .dropdown-menu li:hover {
     }
     #uploadImageBtn{
         display: none;
+    }
+    .limit-banner {
+        height: 70px;
+        top: 72vh;
+        background: #3a3a3a;
+        white-space: wrap;
+        border-radius: 20px;
+        padding: 0 10px 0 10px;
+        width: 90%;
+    }
+    .limit-banner .close-btn{
+        margin-right: 5px;
     }
 }
 .copy-btn {

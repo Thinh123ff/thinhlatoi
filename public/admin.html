@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon_io/favicon-32x32.png">
+    <link rel="shortcut icon" href="/favicon/favicon_io/favicon.ico?v=1.0">
+    <title>Trang quản trị</title>
+</head>
+<body>
+<h2>🔐 Bật tính năng nâng cao cho tài khoản</h2>
+<input type="email" id="emailInput" placeholder="Email tài khoản Google" />
+<input type="password" id="verifyPasswordInput" placeholder="Mật khẩu xác minh" />
+<button onclick="grantAccess()">Cấp quyền</button>
+<button onclick="resetAccess()">Xóa quyền</button>
+
+<script>
+  async function grantAccess() {
+    const email = document.getElementById("emailInput").value;
+    const verifyPassword = document.getElementById("verifyPasswordInput").value;
+
+    const res = await fetch('https://thinhlatoi.onrender.com/admin/update-settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        verifyPassword
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert('✅ Đã bật quyền cho tài khoản: ' + email);
+    } else {
+      alert('❌ Lỗi: ' + (data.error || 'Không xác định'));
+    }
+  }
+  async function resetAccess() {
+      const email = document.getElementById("emailInput").value;
+      const verifyPassword = document.getElementById("verifyPasswordInput").value;
+
+      const res = await fetch('https://thinhlatoi.onrender.com/admin/update-settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, verifyPassword, reset: true })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+          alert('🧹 Đã reset quyền về mặc định cho: ' + email);
+      } else {
+          alert('❌ ' + (data.error || 'Lỗi không xác định'));
+      }
+  }
+</script>
+</body>
+</html>

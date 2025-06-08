@@ -99,6 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function generateSessionId(email) {
         return `${email}_${Date.now()}`;
     }
+
     // Load saved theme preference
     loadThemePreference();
 
@@ -239,14 +240,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Auto-resize textarea
-    userInput.addEventListener('input', function() {
+    userInput.addEventListener('input', function () {
         this.style.height = 'auto';
         this.style.height = Math.min(this.scrollHeight, 150) + 'px';
         sendBtn.disabled = this.value.trim() === '' && !isGenerating;
     });
 
     // Send message on Enter key (but allow Shift+Enter for new line)
-    userInput.addEventListener('keydown', function(e) {
+    userInput.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             if (!sendBtn.disabled) {
@@ -268,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Theme toggle
-    themeToggle.addEventListener('click', function() {
+    themeToggle.addEventListener('click', function () {
         document.body.classList.toggle('dark-mode');
         updateThemeIcon();
         saveThemePreference();
@@ -329,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Nếu không tìm thấy phiên (mã lỗi 404), tạo phiên mới
                     if (res.status === 404) {
                         console.log('Không tìm thấy phiên, tạo phiên mới');
-                        return { history: [] };
+                        return {history: []};
                     }
                     throw new Error('Lỗi khi tải lịch sử hội thoại');
                 }
@@ -485,12 +486,12 @@ document.addEventListener('DOMContentLoaded', function() {
             fileDisplay.remove();
         }
 
-        addMessage({ text: message, files: selectedFiles }, "user");
+        addMessage({text: message, files: selectedFiles}, "user");
 
         const formData = new FormData();
         formData.append("message", message);
         formData.append("sessionId", currentSessionId);
-        formData.append("model", currentModel); // Ensure currentModel is sent
+        formData.append("model", currentModel);
         formData.append("anonymousToken", getAnonymousToken());
         selectedFiles.forEach((file) => formData.append("files", file));
 
@@ -519,8 +520,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentModel === "text-embedding-3-large") {
             fetch("https://thinhlatoi.onrender.com/api/ask-knowledge", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: message, model: currentModel }),
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({question: message, model: currentModel}),
             })
                 .then((res) => res.json())
                 .then((data) => {
@@ -553,11 +554,16 @@ document.addEventListener('DOMContentLoaded', function() {
             .then((response) => {
                 if (!response.ok) {
                     return response.json().then((data) => {
-                        showToast(data.reply);
                         typingIndicator.style.display = "none";
                         isGenerating = false;
                         toggleSendStopButton("send");
                         selectedFiles = [];
+
+                        if (data.showBanner) {
+                            showHeaderBanner(data.bannerMessage);
+                        } else {
+                            showToast(data.reply);
+                        }
                     });
                 }
 
@@ -589,12 +595,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const decoder = new TextDecoder();
                 let buffer = "";
 
-                function processStream({ done, value }) {
+                function processStream({done, value}) {
                     if (done) {
                         return;
                     }
 
-                    buffer += decoder.decode(value, { stream: true });
+                    buffer += decoder.decode(value, {stream: true});
                     const lines = buffer.split("\n");
                     buffer = lines.pop();
 
@@ -640,6 +646,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 scrollToBottom(true);
             });
+    }
+
+    function showHeaderBanner(message) {
+        const banner = document.getElementById('limitBanner');
+        const upgradeBtn = document.getElementById('upgradeButton');
+        if (banner && upgradeBtn) {
+            banner.querySelector('span').textContent = message;
+            banner.style.display = 'flex';
+            upgradeBtn.style.display = 'none'; // Ẩn button ban đầu
+
+            // Thêm sự kiện đóng banner
+            const closeBtn = banner.querySelector('#closeBanner');
+            closeBtn.onclick = () => {
+                banner.style.display = 'none';
+                upgradeBtn.style.display = 'block'; // Hiển thị button sau khi đóng
+            };
+
+            // Ẩn banner sau 10 giây và hiển thị button
+            setTimeout(() => {
+                banner.style.display = 'none';
+                upgradeBtn.style.display = 'block';
+                upgradeBtn.querySelector('.upgrade-btn').onclick = () => window.location.href = 'pricing.html';
+            }, 9900); // 9900ms để đồng bộ với hiệu ứng
+        }
     }
 
     function simulateStream(fullText, contentDiv) {
@@ -897,7 +927,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
-                const fakeFile = new File([blob], `screenshot-${Date.now()}.png`, { type: blob.type });
+                const fakeFile = new File([blob], `screenshot-${Date.now()}.png`, {type: blob.type});
                 selectedFiles.push(fakeFile);
                 updateFileDisplay();
                 event.preventDefault(); // chặn paste text nếu ảnh được xử lý
@@ -924,7 +954,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     clearBtn.addEventListener('click', function () {
-        fetch('https://thinhlatoi.onrender.com/api/user', { credentials: 'include' })
+        fetch('https://thinhlatoi.onrender.com/api/user', {credentials: 'include'})
             .then(res => res.json())
             .then(user => {
                 const newSessionId = generateSessionId(user.email);
@@ -945,6 +975,7 @@ document.addEventListener('DOMContentLoaded', function() {
             toast.remove();
         }, duration);
     }
+
     function enableImageZoom(imgElement) {
         imgElement.style.cursor = 'zoom-in';
         imgElement.addEventListener('click', () => {
@@ -963,6 +994,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
     const lastVisit = localStorage.getItem("lastVisit");
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
@@ -975,7 +1007,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Gọi API lấy user (nếu có session)
-    fetch('https://thinhlatoi.onrender.com/api/user', { credentials: 'include' })
+    fetch('https://thinhlatoi.onrender.com/api/user', {credentials: 'include'})
         .then(res => {
             if (!res.ok) throw new Error('Chưa đăng nhập');
             return res.json();
@@ -1033,6 +1065,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         currentUserEmail = user.email;
 
+        fetch('https://thinhlatoi.onrender.com/api/user/settings')
+            .then(res => res.json())
+            .then(settings => {
+                if (settings?.enabledModels?.includes('text-embedding-3-large')) {
+                    document.querySelector('[data-value="text-embedding-3-large"]')?.classList.remove('hidden');
+                }
+                if (settings?.enabledModels?.includes('gpt-4o-search-preview')) {
+                    document.querySelector('[data-value="gpt-4o-search-preview"]')?.classList.remove('hidden');
+                }
+                if (settings?.enableRecordButton) {
+                    document.getElementById('recordBtn')?.classList.remove('hidden');
+                }
+            });
+
         if (!currentSessionId) {
             currentSessionId = generateSessionId(currentUserEmail);
             localStorage.setItem('sessionId', currentSessionId);
@@ -1044,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadConversationMenu(email) {
-        fetch('https://thinhlatoi.onrender.com/conversation-list', { credentials: 'include' })
+        fetch('https://thinhlatoi.onrender.com/conversation-list', {credentials: 'include'})
             .then(res => res.json())
             .then(data => {
                 const menu = document.querySelector('.menu-content');
@@ -1063,7 +1109,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const sortedDates = Object.keys(groupedByDate).sort((a, b) => new Date(b) - new Date(a));
 
                 sortedDates.forEach(date => {
-                    const dateLabel = (new Date(date)).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const dateLabel = (new Date(date)).toLocaleDateString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
                     const dateHeader = document.createElement('div');
                     dateHeader.className = 'menu-date-label';
                     dateHeader.textContent = dateLabel;
@@ -1167,6 +1217,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.removeEventListener('click', handleClickOutside);
                 }
             }
+
             document.addEventListener('click', handleClickOutside);
         }, 0);
     }
@@ -1215,8 +1266,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch(`https://thinhlatoi.onrender.com/conversation/${sessionId}/rename`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ newName })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({newName})
         })
             .then(res => {
                 if (!res.ok) throw new Error('Lỗi đổi tên');
@@ -1289,7 +1340,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Khi người dùng đăng nhập thành công
-    fetch('https://thinhlatoi.onrender.com/api/user', { credentials: 'include' })
+    fetch('https://thinhlatoi.onrender.com/api/user', {credentials: 'include'})
         .then(res => res.json())
         .then(user => {
             document.getElementById('avatar').src = user.avatar || 'default-avatar.png';
@@ -1303,7 +1354,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function waitForAvatar() {
-        fetch('https://thinhlatoi.onrender.com/api/user', { credentials: 'include' })
+        fetch('https://thinhlatoi.onrender.com/api/user', {credentials: 'include'})
             .then(res => res.json())
             .then(user => {
                 // Nếu avatar vẫn là default thì tiếp tục chờ
@@ -1322,7 +1373,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
         mediaRecorder = new MediaRecorder(stream);
 
         mediaRecorder.ondataavailable = event => {
@@ -1330,7 +1381,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const audioBlob = new Blob(audioChunks, {type: 'audio/webm'});
             sendAudioToServer(audioBlob);
             audioChunks = [];
         };
@@ -1407,9 +1458,18 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isUnclear) {
             addMessage("🎤 Âm thanh chưa rõ, bạn có thể ghi âm lại không?");
         } else {
-            addMessage({ text }, "user");
+            addMessage({text}, "user");
             userInput.value = text;
             sendMessage();
         }
     }
+
+    document.getElementById('update-pricing').addEventListener('click',
+        function () {
+            window.location.href = 'pricing.html';
+        });
+    document.getElementById('upgrade-btn').addEventListener('click',
+        function () {
+            window.location.href = 'pricing.html';
+        });
 });
