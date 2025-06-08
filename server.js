@@ -61,6 +61,7 @@ passport.use(new GoogleStrategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: process.env.GOOGLE_CALLBACK_URL
 }, async (accessToken, refreshToken, profile, done) => {
+    console.log("✅ Đang dùng callback URL:", process.env.GOOGLE_CALLBACK_URL);
     try {
         const email = profile.emails?.[0]?.value;
         const photoUrl = profile.photos?.[0]?.value;
