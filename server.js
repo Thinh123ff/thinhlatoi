@@ -41,7 +41,8 @@ app.use(cors({
         'http://localhost:5000',
         'https://cron-job.org',
         'https://thinhnt-mr.github.io'
-    ]
+    ],
+    credentials: true
 }));
 
 app.use(express.json());

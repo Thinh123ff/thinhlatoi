@@ -3,7 +3,6 @@ node_modules/
 
 # Tệp dữ liệu
 data.json
-uploads/
 
 # IDE/editor config
 .idea/

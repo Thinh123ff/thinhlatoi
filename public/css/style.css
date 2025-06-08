@@ -323,13 +323,11 @@ body.loaded {
 .title-login{
     font-family: Arial, sans-serif;
     font-weight: normal;
-    font-size: 27px;
     margin-bottom: 40px;
 }
 .title-register{
     font-family: Arial, sans-serif;
     font-weight: normal;
-    font-size: 30px;
     margin-bottom: 40px;
 }
 #registerForm{
@@ -341,7 +339,6 @@ body.loaded {
 .email-login{
     border: 1px solid #666666;
     background-color: #1F1B29;
-    width: 380px;
     color: white;
     margin-bottom: 15px;
     padding: 15px;
@@ -350,7 +347,6 @@ body.loaded {
 #login-button{
     border: 1px solid #666666;
     background-color: #4F46E5;
-    width: 380px;
     color: white;
     padding: 12px;
     margin-bottom: 10px;
@@ -363,7 +359,6 @@ body.loaded {
 .password-login{
     border: 1px solid #666666;
     background-color: #1F1B29;
-    width: 380px;
     color: white;
     padding: 15px;
     margin-bottom: 30px;
@@ -372,7 +367,6 @@ body.loaded {
 .email-create{
     border: 1px solid #666666;
     background-color: #1F1B29;
-    width: 380px;
     color: white;
     margin-bottom: 15px;
     padding: 15px;
@@ -381,7 +375,6 @@ body.loaded {
 #create-button{
     border: 1px solid #666666;
     background-color: #4F46E5;
-    width: 380px;
     color: white;
     padding: 12px;
     margin-bottom: 10px;
@@ -394,7 +387,6 @@ body.loaded {
 .password-create{
     border: 1px solid #666666;
     background-color: #1F1B29;
-    width: 380px;
     color: white;
     padding: 15px;
     border-radius: 25px;
@@ -426,7 +418,7 @@ body.loaded {
     gap: 15px;
     align-items: center;
     justify-content: center;
-    width: 380px;
+    width: 310px;
     margin-bottom: 15px;
     border-radius: 25px;
     font-size: 16px;
@@ -473,6 +465,7 @@ body.loaded {
     align-items: center;
     background-color: #1F1B29;
     border-radius: 20px;
+    color: white;
     width: 400px;
     height: 375px;
 }
@@ -1686,7 +1679,6 @@ body.dark-mode .dropdown-menu li:hover {
     .menu-icon-pc {
         display: none; /* Ẩn icon PC */
     }
-
     .menu-icon-mobile {
         display: block; /* Hiển thị icon Mobile */
     }
@@ -1756,6 +1748,9 @@ body.dark-mode .dropdown-menu li:hover {
         font-size: 13px;
         width: 100%;
         padding: 10px;
+    }
+    #uploadImageBtn{
+        display: none;
     }
 }
 .copy-btn {
