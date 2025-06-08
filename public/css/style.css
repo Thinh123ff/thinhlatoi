@@ -845,21 +845,23 @@ pre code.hljs {
     word-break: break-word;
 }
 .message-content table {
-    overflow-x: auto;
-    max-width: 90vw;
     width: 100%;
-}
-.message-content .table-wrapper table {
-    min-width: 500px;
-    display: inline-block;
-    font-size: 14px;
+    border-collapse: collapse;
+    font-size: 15px;
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
 }
 .message-content th,
 .message-content td {
-    font-size: 13px;
-    padding: 6px 10px;
-    min-width: 200px;
-    word-break: break-word;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    text-align: left;
+    min-width: 100px;
+}
+.message-content th {
+    background-color: #262153;
+    color: white;
 }
 /* Code block AI trả lời */
 .message-content pre {
