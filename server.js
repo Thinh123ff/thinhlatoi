@@ -131,6 +131,7 @@ app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'em
 
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login-failed' }), (req, res) => {
     const email = req.user.emails?.[0]?.value;
+    if (email) db.logLogin(email);
     const photoUrl = req.user.photos?.[0]?.value;
     const avatarPath = path.join(AVATAR_DIR, `${email}.jpg`);
 
@@ -248,7 +249,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
     if (email !== 'anonymous') {
         const todayCount = db.countUserMessagesToday(email);
         const settings = db.getUserSettings(email);
-        const limit = settings?.dailyQuestionLimit || 5;
+        const limit = settings?.dailyQuestionLimit !== undefined ? settings.dailyQuestionLimit : 5;
         if (todayCount >= limit) {
             return res.status(429).json({
                 showBanner: true,
@@ -258,7 +259,7 @@ app.post('/ask', upload.array('files'), async (req, res) => {
     } else {
         const todayCount = db.countAnonymousMessagesToday(anonymousToken);
         const settings = db.getUserSettings(email);
-        const limit = settings?.dailyQuestionLimit || 5;
+        const limit = settings?.dailyQuestionLimit !== undefined ? settings.dailyQuestionLimit : 5;
         if (todayCount >= limit) {
             return res.status(429).json({
                 showBanner: true,
@@ -632,6 +633,7 @@ app.post('/api/login', async (req, res) => {
 
         req.login({ emails: [{ value: email }], displayName: email, photos: [{ value: '/image/default-avatar.png' }] }, (err) => {
             if (err) return res.status(500).json({ error: 'Đăng nhập thất bại' });
+            db.logLogin(email); // ← thêm dòng này
             res.json({ success: true });
         });
     } catch (err) {
@@ -651,7 +653,7 @@ app.post('/api/ask-knowledge', async (req, res) => {
 
     const todayCount = db.countUserMessagesToday(email);
     const settings = db.getUserSettings(email);
-    const limit = settings?.dailyQuestionLimit || 5;
+    const limit = settings?.dailyQuestionLimit !== undefined ? settings.dailyQuestionLimit : 5;
     if (todayCount >= limit) {
         return res.status(429).json({ answer: "Nâng cấp lên gói Askiva Pro để tăng tính trải nghiệm hoặc thử lại sau 24h!" });
     }
@@ -746,10 +748,21 @@ ${results.map((r, i) =>
 }
 
 app.post('/admin/update-settings', (req, res) => {
-    const { email, verifyPassword, reset } = req.body;
+    const { email, verifyPassword, reset, block } = req.body;
 
     if (verifyPassword !== process.env.ADMIN_SECRET) {
-        return res.status(403).json({ error: 'Mật khẩu xác minh sai!' });
+        return res.status(401).json({ error: 'Mật khẩu xác minh không đúng' });
+    }
+
+    const existing = db.getUserSettings(email);
+
+    if (block) {
+        if (existing) {
+            db.updateDailyLimit(email, 0);
+        } else {
+            db.insertUserSettings(email, 0);
+        }
+        return res.json({ success: true, message: `Đã chặn quyền ${email}` });
     }
 
     if (reset === true) {
@@ -782,6 +795,17 @@ app.get('/api/settings', (req, res) => {
 
     const settings = db.getUserSettings(email);
     res.json(settings || {});
+});
+
+app.get('/admin/login-logs', (req, res) => {
+    const { verifyPassword } = req.query;
+
+    if (verifyPassword !== process.env.ADMIN_SECRET) {
+        return res.status(401).json({ error: 'Mật khẩu xác minh không đúng' });
+    }
+
+    const logs = db.getLoginLogs();
+    res.json({ logs });
 });
 
 app.get('/ping', (req, res) => {

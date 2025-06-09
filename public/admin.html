@@ -7,52 +7,35 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon_io/favicon-32x32.png">
     <link rel="shortcut icon" href="/favicon/favicon_io/favicon.ico?v=1.0">
     <title>Trang quản trị</title>
+    <style>
+        body { font-family: sans-serif; background: #f7f7f7;text-align: center}
+        h2 { margin-bottom: 10px; }
+        button { margin: 5px 0; padding: 6px 12px; }
+        #loginLogs { margin-top: 20px; background: #fff; padding: 10px; border: 1px solid #ccc; }
+        #loginLogs li{padding: 5px;}
+        input{padding: 5px; width: 300px;}
+    </style>
 </head>
 <body>
-<h2>🔐 Bật tính năng nâng cao cho tài khoản</h2>
+<div id="login-form">
+    <div class="login-container">
+        <h2>Đăng nhập Admin</h2>
+        <input type="text" id="username" placeholder="Tên đăng nhập" required>
+        <input type="password" id="password" placeholder="Mật khẩu" required>
+        <button onclick="login()">Đăng nhập</button>
+        <p id="error" class="error"></p>
+    </div>
+</div>
+<h2>Quản lý tính năng tài khoản</h2>
 <input type="email" id="emailInput" placeholder="Email tài khoản Google" />
 <input type="password" id="verifyPasswordInput" placeholder="Mật khẩu xác minh" />
 <button onclick="grantAccess()">Cấp quyền</button>
 <button onclick="resetAccess()">Xóa quyền</button>
+<button onclick="blockAccess()">Chặn quyền</button>
 
-<script>
-  async function grantAccess() {
-    const email = document.getElementById("emailInput").value;
-    const verifyPassword = document.getElementById("verifyPasswordInput").value;
+<button onclick="showLoginLogs()">View login</button>
+<div id="loginLogs"></div>
 
-    const res = await fetch('https://thinhlatoi.onrender.com/admin/update-settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email,
-        verifyPassword
-      })
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      alert('✅ Đã bật quyền cho tài khoản: ' + email);
-    } else {
-      alert('❌ Lỗi: ' + (data.error || 'Không xác định'));
-    }
-  }
-  async function resetAccess() {
-      const email = document.getElementById("emailInput").value;
-      const verifyPassword = document.getElementById("verifyPasswordInput").value;
-
-      const res = await fetch('https://thinhlatoi.onrender.com/admin/update-settings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, verifyPassword, reset: true })
-      });
-
-      const data = await res.json();
-      if (data.success) {
-          alert('🧹 Đã reset quyền về mặc định cho: ' + email);
-      } else {
-          alert('❌ ' + (data.error || 'Lỗi không xác định'));
-      }
-  }
-</script>
+<script src="/js/admin.js"></script>
 </body>
 </html>

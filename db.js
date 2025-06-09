@@ -34,6 +34,10 @@ db.exec(`
                                                  enableRecordButton INTEGER,
                                                  dailyQuestionLimit INTEGER
     );
+    CREATE TABLE IF NOT EXISTS login_logs (
+                                              email TEXT,
+                                              loginAt TEXT
+    );
 `);
 
 function registerUser(email, hashedPassword) {
@@ -370,6 +374,29 @@ function updateUserSettings(email, settings) {
     }
 }
 
+function updateDailyLimit(email, limit) {
+    db.prepare('UPDATE user_settings SET dailyQuestionLimit = ? WHERE email = ?').run(limit, email);
+}
+
+function insertUserSettings(email, limit) {
+    db.prepare('INSERT INTO user_settings (email, dailyQuestionLimit) VALUES (?, ?)').run(email, limit);
+}
+
+function logLogin(email) {
+    db.prepare('INSERT INTO login_logs (email, loginAt) VALUES (?, ?)').run(email, new Date().toISOString());
+}
+
+function getLoginLogs() {
+    return db.prepare(`
+        SELECT l.email, MAX(l.loginAt) AS latestLogin, 
+               COALESCE(u.dailyQuestionLimit, 5) AS dailyLimit
+        FROM login_logs l
+        LEFT JOIN user_settings u ON l.email = u.email
+        GROUP BY l.email
+        ORDER BY latestLogin DESC
+    `).all();
+}
+
 function getUserSettings(email) {
     const row = db.prepare('SELECT * FROM user_settings WHERE email = ?').get(email);
     return row ? {
@@ -399,4 +426,8 @@ module.exports = {
     countAnonymousMessagesToday,
     getUserSettings,
     updateUserSettings,
+    updateDailyLimit,
+    insertUserSettings,
+    logLogin,
+    getLoginLogs,
 };
