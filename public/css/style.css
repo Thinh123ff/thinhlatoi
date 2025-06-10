@@ -580,6 +580,7 @@ body.loaded {
 }
 #login-button-page{
     background-color: white;
+    border: 1px solid #1f1b29;
     width: 320px;
     color: black;
     padding: 14px;
