@@ -179,8 +179,8 @@ body.loaded {
 .side-menu {
     position: fixed;
     top: 0;
-    left: -260px; /* Ẩn ban đầu */
-    width: 260px;
+    left: -40vh;
+    width: 40vh;
     height: 100%;
     background-color: #191621 !important;
     color: white;
