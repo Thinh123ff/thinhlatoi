@@ -192,7 +192,7 @@ body.loaded {
     align-items: start;
 }
 body:not(.dark-mode) .side-menu{
-    background-color: white;
+    background-color: white !important;
     color: black;
 }
 .side-menu ul {
@@ -251,7 +251,6 @@ body:not(.dark-mode) .side-menu{
     padding: 2px;
     border-radius: 15px;
     margin-top: 10px;
-    color: white;
     height: 36px;
 }
 .menu-right:hover{
@@ -329,6 +328,10 @@ body:not(.dark-mode) .side-menu{
 .menu-item:hover{
     border-radius: 10px;
     background-color: #3f3f3f;
+}
+body:not(.dark-mode) .menu-item:hover{
+    border-radius: 10px;
+    background-color: #a9a9a9;
 }
 .menu-item:hover .menu-label {
     overflow: hidden;
