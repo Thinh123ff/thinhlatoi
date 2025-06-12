@@ -663,7 +663,20 @@ body.loaded {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 10;
 }
-
+body:not(.dark-mode) .dropdown {
+    display: none;
+    position: absolute;
+    right: -20px;
+    top: 45px;
+    background: white;
+    color: black;
+    border-radius: 15px;
+    padding: 15px 5px 10px 5px;
+    min-width: 250px;
+    text-align: center;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
 .dropdown p {
     text-align: start;
     color: #ddd;
@@ -1533,7 +1546,7 @@ body.dark-mode .dropdown-menu {
 }
 
 body.dark-mode .dropdown-menu li:hover {
-    background: #200045;
+    background: #1F1B29;
 }
 
 .dropdown-menu .icon {
