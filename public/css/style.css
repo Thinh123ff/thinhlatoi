@@ -685,6 +685,9 @@ body:not(.dark-mode) .dropdown {
     font-size: 14px;
     word-break: break-word;
 }
+body:not(.dark-mode) .dropdown p {
+    color: black;
+}
 .theme-toggle {
     padding: 5px 10px 5px 10px;
     background: none;
@@ -709,6 +712,9 @@ body:not(.dark-mode) .dropdown-toggle {
 .dropdown-toggle:hover {
     background: #1f1b29;
 }
+body:not(.dark-mode) .dropdown-toggle:hover {
+    background: #f7f7f7;
+}
 .dropdown-toggle span{
     font-size: 14px;
 }
@@ -729,7 +735,7 @@ body:not(.dark-mode) .logout-btn {
     color: black;
 }
 body:not(.dark-mode) .logout-btn:hover {
-    background: #e5e5e5;
+    background: #f7f7f7;
 }
 .logout-btn:hover {
     background: #e5e5e5;
@@ -1554,7 +1560,7 @@ body.dark-mode .dropdown-menu {
 }
 
 .dropdown-menu li:hover {
-    background: #e5e5e5;
+    background: #f7f7f7;
 }
 
 body.dark-mode .dropdown-menu li:hover {
