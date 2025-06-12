@@ -1462,7 +1462,7 @@ textarea {
     align-items: center;
     justify-content: center;
     background: none;
-    border: none;
+    border: 1px solid #666666;
     width: 36px;
     height: 36px;
     padding: 9px;
@@ -1470,7 +1470,10 @@ textarea {
     cursor: pointer;
 }
 .tool-btn:hover{
-    border: 1px solid #666666;
+    background: #1f1b29;
+}
+body:not(.dark-mode) .tool-btn:hover {
+    background: #ededed;
 }
 .tool-btn span{
     font-size: 16px;
