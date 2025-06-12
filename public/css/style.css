@@ -728,8 +728,11 @@ body:not(.dark-mode) .dropdown-toggle {
 body:not(.dark-mode) .logout-btn {
     color: black;
 }
+body:not(.dark-mode) .logout-btn:hover {
+    background: #e5e5e5;
+}
 .logout-btn:hover {
-    background: #200045;
+    background: #e5e5e5;
 }
 #user-area{
     display: none;
