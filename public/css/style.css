@@ -692,6 +692,9 @@ body:not(.dark-mode) .dropdown {
     cursor: pointer;
     color: white;
 }
+body:not(.dark-mode) .theme-toggle {
+    color: black;
+}
 .dropdown-toggle{
     width: 100%;
     display: flex;
@@ -699,6 +702,9 @@ body:not(.dark-mode) .dropdown {
     align-items: center;
     padding: 0;
     border-radius: 10px;
+}
+body:not(.dark-mode) .dropdown-toggle {
+    color: black;
 }
 .dropdown-toggle:hover {
     background: #1f1b29;
@@ -718,6 +724,9 @@ body:not(.dark-mode) .dropdown {
     border-radius: 10px;
     cursor: pointer;
     font-size: 13px;
+}
+body:not(.dark-mode) .logout-btn {
+    color: black;
 }
 .logout-btn:hover {
     background: #200045;
