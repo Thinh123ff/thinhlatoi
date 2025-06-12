@@ -169,7 +169,7 @@ body.loaded {
     background-color: #3f3f3f;
 }
 body:not(.dark-mode) .menu-icon:hover{
-    background-color: gray;
+    background-color: gainsboro;
 }
 .menu-icon-pc {
     display: block;
@@ -260,7 +260,7 @@ body:not(.dark-mode) .side-menu{
     background-color: #3f3f3f;
 }
 body:not(.dark-mode) .menu-right:hover{
-    background-color: gray;
+    background-color: gainsboro;
 }
 #clearBtn{
     display: flex;
