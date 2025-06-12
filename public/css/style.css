@@ -688,7 +688,7 @@ body.loaded {
     border-radius: 10px;
 }
 .dropdown-toggle:hover {
-    background: #3a3a4f;
+    background: #1f1b29;
 }
 .dropdown-toggle span{
     font-size: 14px;
@@ -1512,7 +1512,9 @@ body.dark-mode .dropdown-trigger {
 body.dark-mode .dropdown-menu {
     background-color: #2a2a3b;
     color: #eee;
-    border: 1px solid #444;
+    border: none;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: var;
     z-index: 1010;
 }
 
@@ -1527,7 +1529,7 @@ body.dark-mode .dropdown-menu {
 }
 
 .dropdown-menu li:hover {
-    background: #3a3a4f;
+    background: #1f1b29;
 }
 
 body.dark-mode .dropdown-menu li:hover {
@@ -1841,7 +1843,7 @@ body.dark-mode .dropdown-menu li:hover {
         margin-left: 45px;
     }
     .dropdown-menu{
-        left: 48%;
+        left: 40%;
     }
     .input-wrapper{
         padding: 0 15px;
