@@ -655,7 +655,7 @@ body.loaded {
     position: absolute;
     right: -20px;
     top: 45px;
-    background: #110027;
+    background: #463f59;
     border-radius: 15px;
     padding: 15px 5px 10px 5px;
     min-width: 250px;
@@ -688,7 +688,7 @@ body.loaded {
     border-radius: 10px;
 }
 .dropdown-toggle:hover {
-    background: #200045;
+    background: #;
 }
 .dropdown-toggle span{
     font-size: 14px;
@@ -1473,7 +1473,7 @@ textarea {
     margin-right: 6px;
 }
 body.dark-mode .dropdown-trigger {
-    background: #110027;
+    background: #1f1b29;
     border-color: #555;
     color: #fff;
 }
@@ -1510,7 +1510,7 @@ body.dark-mode .dropdown-trigger {
 }
 
 body.dark-mode .dropdown-menu {
-    background: #110027;
+    background: #463F95;
     border-color: #555;
     z-index: 1010;
 }
@@ -1526,7 +1526,7 @@ body.dark-mode .dropdown-menu {
 }
 
 .dropdown-menu li:hover {
-    background: #f0f0f0;
+    background: #;
 }
 
 body.dark-mode .dropdown-menu li:hover {
