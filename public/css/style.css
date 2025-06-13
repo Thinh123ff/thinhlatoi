@@ -421,8 +421,6 @@ body:not(.dark-mode) .menu-item:hover{
 }
 .login-btn {
     padding: 10px;
-    background-color: #1F1B29;
-    color: #fff;
     border: 1px solid #555555;
     border-radius: 20px;
     cursor: pointer;
@@ -430,6 +428,7 @@ body:not(.dark-mode) .menu-item:hover{
     transition: all 0.3s ease;
 }
 .login-btn:hover {
+    color: white;
     background-color: #4338CA;
 }
 #loginForm{
@@ -456,7 +455,6 @@ body:not(.dark-mode) .menu-item:hover{
 }
 .email-login{
     border: 1px solid #666666;
-    background-color: #1F1B29;
     color: white;
     margin-bottom: 15px;
     padding: 15px;
@@ -476,7 +474,6 @@ body:not(.dark-mode) .menu-item:hover{
 }
 .password-login{
     border: 1px solid #666666;
-    background-color: #1F1B29;
     color: white;
     padding: 15px;
     margin-bottom: 30px;
@@ -624,6 +621,10 @@ body:not(.dark-mode) .menu-item:hover{
 }
 .modal-content a{
     color: white;
+    text-decoration: none;
+}
+body:not(.dark-mode) .modal-content a{
+    color: black;
     text-decoration: none;
 }
 .modal-content p{
@@ -796,6 +797,10 @@ body:not(.dark-mode) #user-area:hover {
     color: #fff;
     font-family: Arial, sans-serif;
     animation: fadeIn 0.3s ease-in-out;
+}
+body:not(.dark-mode) .modal-content {
+    background: white;
+    color: black;
 }
 .submit-error{
     display: flex;
