@@ -1363,6 +1363,7 @@ pre code.hljs {
     border-radius: 100%;
     border: none;
     background: none;
+    border: 1px solid #666666;
 }
 #recordIcon {
     transition: stroke 0.3s ease; /* Hiệu ứng mượt cho stroke */
@@ -1414,8 +1415,10 @@ pre code.hljs {
     stroke: #cc0000; /* Màu đỏ nhạt khi hover */
 }
 #recordBtn:hover{
-    color: #2d98ff;
-    border: 1px solid #666666;
+    background: #1f1b29;
+}
+body:not(.dark-mode) #recordBtn:hover{
+    background: #ededed;
 }
 .waveform .bar:nth-child(2) { animation-delay: 0.1s; }
 .waveform .bar:nth-child(3) { animation-delay: 0.2s; }
@@ -1879,6 +1882,11 @@ body.dark-mode .dropdown-menu li:hover {
         white-space: wrap;
     }
     .more-btn {
+        color: black;
+        opacity: 1 !important;
+    }
+    body:not(.dark-mode) .more-btn {
+        color: white;
         opacity: 1 !important;
     }
     .dropdown-toggle {
