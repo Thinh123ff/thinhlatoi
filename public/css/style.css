@@ -272,6 +272,9 @@ body:not(.dark-mode) .menu-right:hover{
     color: white;
     border-radius: 10px;
 }
+#clearBtn:hover{
+    background: none;
+}
 .new-chat{
     display: flex;
     justify-self: start;
