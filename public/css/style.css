@@ -1359,12 +1359,15 @@ pre code.hljs {
     position: absolute;
     right: 3.5rem;
     padding: 8px;
-    color: dodgerblue;
+    color: white;
     border-radius: 100%;
     border: none;
     background: none;
     border: 1px solid #666666;
 }
+  body:not(.dark-mode) #recordBtn {
+      color: black;
+  }
 #recordIcon {
     transition: stroke 0.3s ease; /* Hiệu ứng mượt cho stroke */
 }
@@ -1882,11 +1885,11 @@ body.dark-mode .dropdown-menu li:hover {
         white-space: wrap;
     }
     .more-btn {
-        color: black;
+        color: white;
         opacity: 1 !important;
     }
     body:not(.dark-mode) .more-btn {
-        color: white;
+        color: black;
         opacity: 1 !important;
     }
     .dropdown-toggle {
