@@ -436,6 +436,7 @@ body:not(.dark-mode) .menu-item:hover{
     flex-direction: column;
     justify-content: center;
     padding: 10px 0 20px 0;
+    width: 400px;
 }
 .title-login{
     font-family: Arial, sans-serif;
@@ -483,7 +484,6 @@ body:not(.dark-mode) .menu-item:hover{
 }
 .email-create{
     border: 1px solid #666666;
-    background-color: #1F1B29;
     color: white;
     margin-bottom: 15px;
     padding: 15px;
@@ -503,7 +503,6 @@ body:not(.dark-mode) .menu-item:hover{
 }
 .password-create{
     border: 1px solid #666666;
-    background-color: #1F1B29;
     color: white;
     padding: 15px;
     border-radius: 25px;
@@ -1957,6 +1956,9 @@ body.dark-mode .dropdown-menu li:hover {
         width: 300px;
     }
     ._root_12co7_1{
+        width: 300px;
+    }
+    #loginForm{
         width: 300px;
     }
 }
