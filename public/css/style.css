@@ -443,6 +443,7 @@ body:not(.dark-mode) .menu-item:hover{
     margin-bottom: 40px;
 }
 .title-register{
+    text-align: center;
     font-family: Arial, sans-serif;
     font-weight: normal;
     margin-bottom: 40px;
@@ -451,6 +452,7 @@ body:not(.dark-mode) .menu-item:hover{
     display: flex;
     flex-direction: column;
     justify-content: center;
+    width: 400px;
     padding: 10px 0 20px 0;
 }
 .email-login{
@@ -512,7 +514,7 @@ body:not(.dark-mode) .menu-item:hover{
     align-items: center;
     padding: 0 0 20px 0;
     gap: 10px;
-    width: 320px;
+    width: 380px;
 }
 ._line_12co7_7 {
     height: 1px;
@@ -533,7 +535,7 @@ body:not(.dark-mode) .menu-item:hover{
     gap: 15px;
     align-items: center;
     justify-content: center;
-    width: 310px;
+    width: 400px;
     margin-bottom: 15px;
     border-radius: 25px;
     font-size: 16px;
@@ -1947,6 +1949,15 @@ body.dark-mode .dropdown-menu li:hover {
     }
     .limit-banner .close-btn{
         margin-right: 5px;
+    }
+    #registerForm{
+        width: 300px;
+    }
+    #second-google-login-btn{
+        width: 300px;
+    }
+    ._root_12co7_1{
+        width: 300px;
     }
 }
 .copy-btn {
