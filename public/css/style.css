@@ -1791,6 +1791,15 @@ body.dark-mode .dropdown-menu li:hover {
         cursor: pointer;
         z-index: 2;
     }
+    .close-btn {
+        position: absolute;
+        right: 4vh;
+        background: transparent;
+        border: none;
+        font-size: 20px;
+        color: #fff;
+        cursor: pointer;
+    }
     .message-content pre {
         font-size: 13px;
         background-color: #232323;
