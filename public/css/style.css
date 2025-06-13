@@ -1958,6 +1958,12 @@ body.dark-mode .dropdown-menu li:hover {
     #loginForm{
         width: 300px;
     }
+    #welcome-text-pc{
+        display: none;
+    }
+    #welcome-text-mobile{
+        display: block;
+    }
 }
 .copy-btn {
     position: absolute;
