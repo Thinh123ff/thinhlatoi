@@ -161,8 +161,8 @@ body.loaded {
 
 .menu-icon{
     position: fixed;
-    padding: 2px;
-    border-radius: 15px;
+    padding: 6px;
+    border-radius: 100%;
     z-index: 99;
 }
 .menu-icon:hover{
@@ -251,10 +251,10 @@ body:not(.dark-mode) .side-menu{
     justify-content: space-between;
 }
 .menu-right{
-    padding: 2px;
-    border-radius: 15px;
+    padding: 6px;
+    border-radius: 100%;
     margin-top: 10px;
-    height: 36px;
+    height: 42px;
 }
 .menu-right:hover{
     background-color: #3f3f3f;
@@ -764,7 +764,7 @@ body:not(.dark-mode) .logout-btn:hover {
     background-color: #3f3f3f;
 }
 body:not(.dark-mode) #user-area:hover {
-     background-color: #d9d9d9;
+    background-color: #d9d9d9;
 }
 .user-avatar{
     display: flex;
@@ -819,6 +819,7 @@ body:not(.dark-mode) #user-area:hover {
     margin-bottom: 16px;
 }
 .modal-header h2 {
+    text-align: center;
     font-size: 20px;
     margin: 0;
 }
@@ -1574,7 +1575,6 @@ body.dark-mode .dropdown-menu {
     color: #eee;
     border: none;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    box-shadow: var;
     z-index: 1010;
 }
 
@@ -1867,8 +1867,6 @@ body.dark-mode .dropdown-menu li:hover {
     }
     .messages {
         width: 100%;
-        padding-left: 5px;
-        padding-right: 5px;
         overflow-x: hidden;
     }
     .message-content p,
