@@ -466,7 +466,7 @@ body:not(.dark-mode) .menu-item:hover{
 }
 #login-button{
     border: 1px solid #666666;
-    background-color: #4F46E5;
+    background-color: black;
     color: white;
     padding: 12px;
     margin-bottom: 10px;
@@ -474,7 +474,7 @@ body:not(.dark-mode) .menu-item:hover{
     border-radius: 25px;
 }
 #login-button:hover{
-    background-color: #624fff;
+    background-color: #323232;
 }
 .password-login{
     border: 1px solid #666666;
@@ -492,7 +492,7 @@ body:not(.dark-mode) .menu-item:hover{
 }
 #create-button{
     border: 1px solid #666666;
-    background-color: #4F46E5;
+    background-color: black;
     color: white;
     padding: 12px;
     margin-bottom: 10px;
@@ -500,7 +500,7 @@ body:not(.dark-mode) .menu-item:hover{
     border-radius: 25px;
 }
 #create-button:hover{
-    background-color: #624fff;
+    background-color: #323232;
 }
 .password-create{
     border: 1px solid #666666;
@@ -1953,7 +1953,7 @@ body.dark-mode .dropdown-menu li:hover {
         width: 300px;
     }
     ._root_12co7_1{
-        width: 300px;
+        width: 280px;
     }
     #loginForm{
         width: 300px;
