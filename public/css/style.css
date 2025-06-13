@@ -281,10 +281,6 @@ body:not(.dark-mode) .menu-right:hover{
     border-radius: 10px;
     width: 125px;
 }
-.new-chat:hover{
-    padding: 3px 0 3px 0;
-    background-color: #4a35f8;
-}
 #new-chat{
     color: white;
 }
