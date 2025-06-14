@@ -253,7 +253,7 @@ body:not(.dark-mode) .side-menu{
 .menu-right{
     padding: 6px;
     border-radius: 100%;
-    margin-top: 10px;
+    margin-top: 5px;
     height: 42px;
 }
 .menu-right:hover{
@@ -385,7 +385,7 @@ body:not(.dark-mode) .menu-item:hover{
 .options-popup {
     position: absolute;
     color: white;
-    background: #333333;
+    background: #383838;
     border-radius: 8px;
     z-index: 9999;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -815,6 +815,10 @@ body:not(.dark-mode) #user-area:hover {
     border-radius: 15px;
     text-align: center;
 }
+body:not(.dark-mode) .submit-error {
+    background: white;
+    color: black;
+}
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -846,7 +850,6 @@ body:not(.dark-mode) #user-area:hover {
     font-weight: bold;
     margin-bottom: 4px;
 }
-
 .modal-body select,
 .modal-body textarea {
     width: 100%;
@@ -859,7 +862,10 @@ body:not(.dark-mode) #user-area:hover {
     color: #fff;
     font-size: 14px;
 }
-
+body:not(.dark-mode) .modal-body select, .modal-body textarea {
+    background: white;
+    color: black;
+}
 .modal-body textarea {
     padding: 15px;
     border-radius: 20px;
@@ -1286,6 +1292,12 @@ pre code.hljs {
 .user-message {
     align-self: flex-end;
     flex-direction: row-reverse;
+    padding: 12px 16px;
+    border-radius: 25px 4px 25px 25px;
+    background: #353739;
+}
+body:not(.dark-mode) .user-message{
+    background: #d3d6f3;
 }
 .ai-message {
     align-self: flex-start;
@@ -1306,7 +1318,6 @@ pre code.hljs {
     box-shadow: var(--shadow);
     padding: 0 8px 8px 8px;
     display: flex;
-    border: 1px solid #3E3760;
     flex-direction: column;
     justify-self: center;
     width: 103%;
@@ -1366,20 +1377,19 @@ pre code.hljs {
     padding: 8px;
     color: #AAAAAA;
     border-radius: 100%;
-    border: none;
     background: none;
-    border: 1px solid #666666;
+    border: 1px solid #515151;
 }
 #recordBtn:hover{
     color: white;
 }
 body:not(.dark-mode) #recordBtn {
+    border: 1px solid #c8c8c8;
     color: black;
 }
 #recordIcon {
     transition: stroke 0.3s ease; /* Hiệu ứng mượt cho stroke */
 }
-
 .mic-icon, .stop-icon {
     stroke: currentColor;
     stroke-width: 1.75;
@@ -1426,7 +1436,7 @@ body:not(.dark-mode) #recordBtn {
     stroke: #cc0000; /* Màu đỏ nhạt khi hover */
 }
 #recordBtn:hover{
-    background: #1f1b29;
+    background: #3f3f3f;
 }
 body:not(.dark-mode) #recordBtn:hover{
     background: #ededed;
@@ -1485,15 +1495,18 @@ textarea {
     align-items: center;
     justify-content: center;
     background: none;
-    border: 1px solid #666666;
+    border: 1px solid #515151;
     width: 36px;
     height: 36px;
     padding: 9px;
     border-radius: 50%;
     cursor: pointer;
 }
+body:not(.dark-mode) .tool-btn {
+    border: 1px solid #c8c8c8;
+}
 .tool-btn:hover{
-    background: #1f1b29;
+    background: #3f3f3f;
 }
 body:not(.dark-mode) .tool-btn:hover {
     background: #ededed;
@@ -1809,14 +1822,17 @@ body.dark-mode .dropdown-menu li:hover {
         color: #f8f8f2;
         border-radius: 18px;
         overflow-x: auto;
-        max-width: 96vw;
+        max-width: 92vw;
         white-space: pre;
         overflow-wrap: break-word;
         box-sizing: border-box;
         line-height: 1.5;
     }
     .code-header{
-        width: 96%;
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     .message-content pre code {
         min-width: 1000px;
@@ -2049,4 +2065,7 @@ body.dark-mode .dropdown-menu li:hover {
 }
 .dark-mode .tool-btn {
     color: #aaa;
+}
+.dark-mode .tool-btn:hover{
+    color: white;
 }
