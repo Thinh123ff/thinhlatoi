@@ -459,7 +459,7 @@ body:not(.dark-mode) .menu-item:hover{
 }
 .email-login{
     border: 1px solid #666666;
-    color: white;
+    color: black;
     margin-bottom: 15px;
     padding: 15px;
     border-radius: 25px;
@@ -485,7 +485,7 @@ body:not(.dark-mode) .menu-item:hover{
 }
 .email-create{
     border: 1px solid #666666;
-    color: white;
+    color: black;
     margin-bottom: 15px;
     padding: 15px;
     border-radius: 25px;
@@ -1779,7 +1779,7 @@ body.dark-mode .dropdown-menu li:hover {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     .copy-btn {
         position: absolute;
         top: 8px;
@@ -1958,12 +1958,18 @@ body.dark-mode .dropdown-menu li:hover {
     #loginForm{
         width: 300px;
     }
-    #welcome-text-pc{
-        display: none;
+    #welcome-text-pc {
+        display: none !important;
     }
     #welcome-text-mobile{
-        display: block;
+        display: block !important;
     }
+}
+#welcome-text-pc {
+    display: block ;
+}
+#welcome-text-mobile{
+    display: none ;
 }
 .copy-btn {
     position: absolute;
