@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const initialState = document.getElementById('initialState');
     const chatContainer = document.getElementById('chatContainer');
     const menuIcon = document.querySelector('.menu-icon');
+    const menuIconRight = document.querySelector('.menu-icon-right');
     const sideMenu = document.getElementById('sideMenu');
     const overlay = document.getElementById('menuOverlay');
     const uploadBtn = document.getElementById('uploadImageBtn');
@@ -59,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-// Handle option selection
+    // Handle option selection
     dropdownOptions.forEach(opt => {
         opt.addEventListener("click", () => {
             currentModel = opt.getAttribute("data-value");
@@ -71,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-// Close dropdown when clicking outside
+    // Close dropdown when clicking outside
     document.addEventListener("click", (e) => {
         if (!modelSelector.contains(e.target)) {
             dropdownMenu.style.display = "none";
@@ -104,6 +105,10 @@ document.addEventListener('DOMContentLoaded', function() {
     loadThemePreference();
 
     menuIcon.addEventListener('click', () => {
+        sideMenu.classList.toggle('open');
+        overlay.classList.toggle('active');
+    });
+    menuIconRight.addEventListener('click', () => {
         sideMenu.classList.toggle('open');
         overlay.classList.toggle('active');
     });
@@ -962,6 +967,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 location.reload();
             });
     });
+
+    const newChatBtn = document.getElementById('newChatBtn');
+
+    if (newChatBtn) {
+        newChatBtn.addEventListener('click', function () {
+            fetch('https://thinhlatoi.onrender.com/api/user', { credentials: 'include' })
+                .then(res => res.json())
+                .then(user => {
+                    const newSessionId = generateSessionId(user.email);
+                    localStorage.setItem('sessionId', newSessionId);
+                    location.reload();
+                });
+        });
+    }
 
     function showToast(message, duration = 6000) {
         const toastContainer = document.getElementById('toastContainer');
