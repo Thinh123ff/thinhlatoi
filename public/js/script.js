@@ -1264,7 +1264,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const newName = prompt("Nhập tên mới cho cuộc hội thoại:", currentName);
         if (!newName || newName.trim() === '') return;
 
-        fetch(`https://thinhlatoi.onrender.com/${sessionId}/rename`, {
+        fetch(`https://thinhlatoi.onrender.com/conversation/${sessionId}/rename`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({newName})
@@ -1279,7 +1279,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function confirmDeleteSession(sessionId) {
         if (!confirm("Bạn có chắc muốn xoá cuộc hội thoại này?")) return;
 
-        fetch(`https://thinhlatoi.onrender.com/${sessionId}`, {
+        fetch(`https://thinhlatoi.onrender.com/conversation/${sessionId}`, {
             method: 'DELETE'
         })
             .then(res => {
