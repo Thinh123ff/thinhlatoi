@@ -1934,9 +1934,6 @@ body.dark-mode .dropdown-menu li:hover {
         height: 40px;
         z-index: 9999;
     }
-    .icon-container{
-        right: 8.5vh;
-    }
     .logo {
         position: relative;
         font-size: 20px;
