@@ -161,11 +161,30 @@ body.loaded {
 
 .menu-icon{
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    justify-content: flex-start;
+    background: #191621;
+    height: 100vh;
+    width: 10vh;
+    transform: none;
+    left: 0;
+    top: 0;
+    padding-top: 20px;
     position: fixed;
     z-index: 99;
+}
+body:not(.dark-mode) .menu-icon {
+    background: white;
+}
+.menu-icon-container, .flex-icon-right{
+    padding-top: 20px;
+}
+#logo-left{
+    padding-bottom: 15px;
+}
+.logo-left a img{
+    border-radius: 10px;
 }
 .menu-icon-container{
     padding: 6px;
@@ -176,14 +195,6 @@ body.loaded {
 }
 body:not(.dark-mode) .menu-icon-container:hover{
     background-color: gainsboro;
-}
-.logo-title{
-    font-family: ui sans-serif, apple-system, system-ui;
-    color: white;
-    font-size: 18px;
-}
-.logo-title{
-    display: block;
 }
 .menu-icon-pc {
     display: block;
@@ -201,7 +212,7 @@ body:not(.dark-mode) .menu-icon-container:hover{
     background-color: #191621 !important;
     color: white;
     padding: 0 17px 0 10px;;
-    transition: left 0.4s ease;
+    transition: left 0.3s ease;
     z-index: 1001;
     display: flex;
     flex-direction: column;
@@ -1934,6 +1945,9 @@ body.dark-mode .dropdown-menu li:hover {
         height: 40px;
         z-index: 9999;
     }
+    body:not(.dark-mode) .header{
+        background-color: white;
+    }
     .logo {
         position: relative;
         font-size: 20px;
@@ -2052,6 +2066,19 @@ body.dark-mode .dropdown-menu li:hover {
     }
     .logo-title{
         display: none;
+    }
+    .menu-icon{
+        padding-top: 10px;
+        background: none;
+    }
+    #logo-left{
+        display: none;
+    }
+    .flex-icon-right{
+        display: none;
+    }
+    body:not(.dark-mode) .menu-icon {
+        background: none;
     }
 }
 #welcome-text-pc {
