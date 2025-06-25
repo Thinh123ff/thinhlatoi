@@ -73,7 +73,7 @@ async function login() {
     const errorEl = document.getElementById('error');
 
     try {
-        const response = await fetch('/admin/login', {
+        const response = await fetch('https://thinhlatoi.onrender.com/admin/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
