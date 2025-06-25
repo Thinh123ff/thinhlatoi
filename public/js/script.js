@@ -1084,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         currentUserEmail = user.email;
 
-        fetch('https://thinhlatoi.onrender.com/api/user/settings')
+        fetch('http://localhost:5000/api/user/settings')
             .then(res => res.json())
             .then(settings => {
                 if (settings?.enabledModels?.includes('text-embedding-3-large')) {

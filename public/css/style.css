@@ -466,6 +466,21 @@ body:not(.dark-mode) .menu-item:hover{
     padding: 10px 0 20px 0;
     width: 400px;
 }
+#loginForm input{
+    border: none;
+    outline: none;
+    border-radius: 25px;
+    padding: 1.1em;
+    background-color: #dbdbdb;
+    box-shadow: inset 2px 5px 10px rgba(0,0,0,0.3);
+    transition: 300ms ease-in-out;
+}
+#loginForm .input:focus {
+    background-color: white;
+    transform: scale(1.05);
+    box-shadow: 13px 13px 100px #969696,
+    -13px -13px 100px #ffffff;
+}
 .title-login{
     font-family: Arial, sans-serif;
     font-weight: normal;
@@ -484,6 +499,21 @@ body:not(.dark-mode) .menu-item:hover{
     justify-content: center;
     width: 400px;
     padding: 10px 0 20px 0;
+}
+#registerForm input{
+    border: none;
+    outline: none;
+    border-radius: 25px;
+    padding: 1.1em;
+    background-color: #dbdbdb;
+    box-shadow: inset 2px 5px 10px rgba(0,0,0,0.3);
+    transition: 300ms ease-in-out;
+}
+#registerForm .input:focus {
+    background-color: white;
+    transform: scale(1.05);
+    box-shadow: 13px 13px 100px #969696,
+    -13px -13px 100px #ffffff;
 }
 .email-login{
     border: 1px solid #666666;
@@ -905,7 +935,7 @@ body:not(.dark-mode) .submit-error {
     background: transparent;
     border: none;
     font-size: 20px;
-    color: #fff;
+    color: red;
     cursor: pointer;
 }
 
