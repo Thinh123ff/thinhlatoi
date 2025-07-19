@@ -2,7 +2,7 @@ async function grantAccess() {
     const email = document.getElementById("emailInput").value;
     const verifyPassword = document.getElementById("verifyPasswordInput").value;
 
-    const res = await fetch('http://localhost:5000/admin/update-settings', {
+    const res = await fetch('https://thinhlatoi.onrender.com/admin/update-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -22,7 +22,7 @@ async function resetAccess() {
     const email = document.getElementById("emailInput").value;
     const verifyPassword = document.getElementById("verifyPasswordInput").value;
 
-    const res = await fetch('http://localhost:5000/admin/update-settings', {
+    const res = await fetch('https://thinhlatoi.onrender.com/admin/update-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, verifyPassword, reset: true })
@@ -39,7 +39,7 @@ async function blockAccess() {
     const email = document.getElementById("emailInput").value;
     const verifyPassword = document.getElementById("verifyPasswordInput").value;
 
-    const res = await fetch('http://localhost:5000/admin/update-settings', {
+    const res = await fetch('https://thinhlatoi.onrender.com/admin/update-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, verifyPassword, block: true })
@@ -54,7 +54,7 @@ async function blockAccess() {
 }
 async function showLoginLogs() {
     const verifyPassword = document.getElementById("verifyPasswordInput").value;
-    const res = await fetch(`http://localhost:5000/admin/login-logs?verifyPassword=${encodeURIComponent(verifyPassword)}`);
+    const res = await fetch(`https://thinhlatoi.onrender.com/admin/login-logs?verifyPassword=${encodeURIComponent(verifyPassword)}`);
     const data = await res.json();
 
     if (data.error) {

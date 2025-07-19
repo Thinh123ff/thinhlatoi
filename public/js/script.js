@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Tải lịch sử hội thoại từ server
     function loadConversationHistory() {
-        fetch(`http://localhost:5000/conversation/${currentSessionId}`)
+        fetch(`https://thinhlatoi.onrender.com/conversation/${currentSessionId}`)
             .then(res => {
                 if (!res.ok) {
                     // Nếu không tìm thấy phiên (mã lỗi 404), tạo phiên mới
@@ -523,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let fullText = "";
 
         if (currentModel === "text-embedding-3-large") {
-            fetch("http://localhost:5000/api/ask-knowledge", {
+            fetch("https://thinhlatoi.onrender.com/api/ask-knowledge", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({question: message, model: currentModel}),
@@ -551,7 +551,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        fetch("http://localhost:5000/ask", {
+        fetch("https://thinhlatoi.onrender.com/ask", {
             method: "POST",
             body: formData,
             signal: signal,
@@ -959,7 +959,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     clearBtn.addEventListener('click', function () {
-        fetch('http://localhost:5000/api/user', {credentials: 'include'})
+        fetch('https://thinhlatoi.onrender.com/api/user', {credentials: 'include'})
             .then(res => res.json())
             .then(user => {
                 const newSessionId = generateSessionId(user.email);
@@ -972,7 +972,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (newChatBtn) {
         newChatBtn.addEventListener('click', function () {
-            fetch('http://localhost:5000/api/user', { credentials: 'include' })
+            fetch('https://thinhlatoi.onrender.com/api/user', { credentials: 'include' })
                 .then(res => res.json())
                 .then(user => {
                     const newSessionId = generateSessionId(user.email);
@@ -1026,7 +1026,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Gọi API lấy user (nếu có session)
-    fetch('http://localhost:5000/api/user', {credentials: 'include'})
+    fetch('https://thinhlatoi.onrender.com/api/user', {credentials: 'include'})
         .then(res => {
             if (!res.ok) throw new Error('Chưa đăng nhập');
             return res.json();
@@ -1046,7 +1046,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Sự kiện đăng nhập
     document.getElementById("custom-login-btn").addEventListener("click", () => {
-        window.location.href = "http://localhost:5000/auth/google";
+        window.location.href = "https://thinhlatoi.onrender.com/auth/google";
     });
 
     // Sự kiện đăng xuất
@@ -1054,7 +1054,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const dropdown = document.getElementById("dropdown");
         dropdown.innerHTML = `<p style="color: #ccc; margin: 0;">Đang đăng xuất...</p>`;
         setTimeout(() => {
-            fetch('http://localhost:5000/api/logout', {
+            fetch('https://thinhlatoi.onrender.com/api/logout', {
                 method: 'POST',
                 credentials: 'include'
             }).then(() => {
@@ -1084,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         currentUserEmail = user.email;
 
-        fetch('http://localhost:5000/api/user/settings')
+        fetch('https://thinhlatoi.onrender.com/api/user/settings')
             .then(res => res.json())
             .then(settings => {
                 if (settings?.enabledModels?.includes('text-embedding-3-large')) {
@@ -1109,7 +1109,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadConversationMenu(email) {
-        fetch('http://localhost:5000/conversation-list', {credentials: 'include'})
+        fetch('https://thinhlatoi.onrender.com/conversation-list', {credentials: 'include'})
             .then(res => res.json())
             .then(data => {
                 const menu = document.querySelector('.menu-content');
@@ -1242,7 +1242,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function shareConversation(sessionId) {
-        fetch(`http://localhost:5000/${sessionId}/share`, {
+        fetch(`https://thinhlatoi.onrender.com/${sessionId}/share`, {
             method: 'POST'
         })
             .then(res => res.json())
@@ -1283,7 +1283,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const newName = prompt("Nhập tên mới cho cuộc hội thoại:", currentName);
         if (!newName || newName.trim() === '') return;
 
-        fetch(`http://localhost:5000/conversation/${sessionId}/rename`, {
+        fetch(`https://thinhlatoi.onrender.com/conversation/${sessionId}/rename`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({newName})
@@ -1298,7 +1298,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function confirmDeleteSession(sessionId) {
         if (!confirm("Bạn có chắc muốn xoá cuộc hội thoại này?")) return;
 
-        fetch(`http://localhost:5000/conversation/${sessionId}`, {
+        fetch(`https://thinhlatoi.onrender.com/conversation/${sessionId}`, {
             method: 'DELETE'
         })
             .then(res => {
@@ -1359,7 +1359,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Khi người dùng đăng nhập thành công
-    fetch('http://localhost:5000/api/user', {credentials: 'include'})
+    fetch('https://thinhlatoi.onrender.com/api/user', {credentials: 'include'})
         .then(res => res.json())
         .then(user => {
             document.getElementById('avatar').src = user.avatar || 'default-avatar.png';
@@ -1373,7 +1373,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function waitForAvatar() {
-        fetch('http://localhost:5000/api/user', {credentials: 'include'})
+        fetch('https://thinhlatoi.onrender.com/api/user', {credentials: 'include'})
             .then(res => res.json())
             .then(user => {
                 // Nếu avatar vẫn là default thì tiếp tục chờ
@@ -1445,7 +1445,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('sessionId', currentSessionId);
         formData.append('model', currentModel);
 
-        fetch('http://localhost:5000/api/upload-audio', {
+        fetch('https://thinhlatoi.onrender.com/api/upload-audio', {
             method: 'POST',
             body: formData
         })
